@@ -48,7 +48,7 @@ public class LevelGenerator : MonoBehaviour
             xPos = 0;
             yPos -= 1.25f;
         }
-        for(int col = cornerlevelMap.GetLength(0) - 1; col > -1; col--){
+        for(int col = cornerlevelMap.GetLength(0) - 2; col > -1; col--){
             List<GameObject> sublist = new List<GameObject>();
             for(int row = 0; row < cornerlevelMap.GetLength(1); row++){
                 InstantiateWallObject(col, row, xPos, yPos, ref sublist);
@@ -183,7 +183,7 @@ public class LevelGenerator : MonoBehaviour
 
         return "notacorner";
     }
-    
+
     List< List<GameObject> > checkSurround(int row, int col){
         List< List<GameObject> > result = new List<List<GameObject>>();
         List<GameObject> aRow = new List<GameObject>();
