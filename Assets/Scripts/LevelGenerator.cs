@@ -63,6 +63,8 @@ public class LevelGenerator : MonoBehaviour
             yPos -= 1.25f;
         }
         yPos = 0;
+
+        orientWall();
     }
 
     // Update is called once per frame
@@ -97,5 +99,154 @@ public class LevelGenerator : MonoBehaviour
                 sublist.Add(Instantiate(wallObjectList[7], new Vector3(xPos, yPos, 0), Quaternion.identity));
                 break;    
         }
+    }
+
+    void orientWall(){
+        for(int row = 0; row < levelMapObjects.Count; row++){
+            for(int col = 0; col < levelMapObjects[row].Count; col++){
+                List< List<GameObject> > surround = checkSurround(row, col);
+                switch(levelMapObjects[row][col].tag){
+                    case "innercorner":
+                        //Write innerCorner
+                        break;
+                    case "innerwall":
+                        //Write inner wall
+                        break;
+                    case "outerwall":
+                        if(surround[1][0] != null){
+                            if(surround[1][0].tag == "outercorner" || surround[1][0].tag == "outerwall" || surround[1][0].tag == "tjunc"){
+                                levelMapObjects[row][col].transform.Rotate(0,0,90);
+                            }
+                        }
+                        else if(surround[1][2] != null ){    
+                            if(surround[1][2].tag == "outercorner" || surround[1][2].tag == "outerwall" || surround[1][2].tag == "tjunc"){
+                                levelMapObjects[row][col].transform.Rotate(0,0,90);
+                            }
+                        }
+                        break;
+                    case "tjunc":
+                        if(surround[1][0].tag == "tjunc"){
+                            levelMapObjects[row][col].transform.localScale += new Vector3(-2,0,0);
+                        }
+                        if(row == levelMapObjects.Count -1){
+                            levelMapObjects[row][col].transform.localScale += new Vector3(0,-2,0);
+                        }
+                        break;
+                    case "outercorner":
+                        //Orient to the inside if it's a strict corner.
+                        switch(isCorner(row, col)){
+                            case "topRight":
+                                levelMapObjects[row][col].transform.Rotate(0, 0, 0);
+                                break;
+                            case "topLeft":
+                                levelMapObjects[row][col].transform.Rotate(0, 0, 270);
+                                break;
+                            case "bottomRight":
+                                levelMapObjects[row][col].transform.Rotate(0, 0, 90);
+                                break;
+                            case "bottomLeft":
+                                levelMapObjects[row][col].transform.Rotate(0, 0, 180);
+                                break;
+                            default:
+                                //Not a corner.
+                                //Check if it's on the side, but not a strict corner. then orient to a pellet.
+                                //List< List<GameObject> > surround = checkSurround(row, col);
+                                //Check the corners of the surrounding grid, and find a pellet.
+                                //otherwise orient towards an empty cell.
+                                break;
+                        }
+                        break;
+                    default:
+                        //do nothing, since it's either a pellet or a empty spot. No orientation needed.
+                        break;
+                }
+            }
+        }
+    }
+    string isCorner(int row, int col){
+        if(row == 0 || row == levelMapObjects.Count - 1){
+            if(col == 0 || col == levelMapObjects[0].Count - 1){
+                if(row == 0 && col == 0){
+                    return "topRight";
+                }
+                else if(row == 0 && col == levelMapObjects[0].Count - 1){
+                    return "topLeft";
+                }
+                else if(row == levelMapObjects.Count - 1 && col == 0){
+                    return "bottomRight";
+                }
+                else if(row == levelMapObjects.Count - 1 && col == levelMapObjects[0].Count - 1){
+                    return "bottomLeft";
+                }
+            }
+        }
+
+        return "notacorner";
+    }
+    
+    List< List<GameObject> > checkSurround(int row, int col){
+        List< List<GameObject> > result = new List<List<GameObject>>();
+        List<GameObject> aRow = new List<GameObject>();
+        
+        if(row - 1 < 0 || col -1 < 0){
+            aRow.Add(null);
+        }
+        else{
+            aRow.Add(levelMapObjects[row -1][col -1]);
+        }
+        if(row - 1 < 0){
+            aRow.Add(null);
+        }
+        else{
+            aRow.Add(levelMapObjects[row -1][col]);
+        }
+        if(row - 1 < 0 || col + 1 > levelMapObjects[row].Count-1){
+            aRow.Add(null);
+        }
+        else{
+            aRow.Add(levelMapObjects[row -1][col + 1]);
+        }
+        result.Add(aRow);
+        aRow = new List<GameObject>();
+        
+        //2nd Row
+        if(col - 1 < 0){
+            aRow.Add(null);
+        }
+        else{
+            aRow.Add(levelMapObjects[row][col -1]);
+        }
+        aRow.Add(levelMapObjects[row][col]);
+        if(col + 1 > levelMapObjects[row].Count -1){
+            aRow.Add(null);
+        }
+        else{
+            aRow.Add(levelMapObjects[row][col + 1]);
+        }
+        result.Add(aRow);
+        aRow = new List<GameObject>();
+
+        //3rd row
+        if(row + 1 > levelMapObjects.Count - 1 || col -1 < 0){
+            aRow.Add(null);
+        }
+        else{
+            aRow.Add(levelMapObjects[row +1][col -1]);
+        }
+        if(row + 1 > levelMapObjects.Count - 1){
+            aRow.Add(null);
+        }
+        else{
+            aRow.Add(levelMapObjects[row +1][col]);
+        }
+        if(row + 1 > levelMapObjects.Count -1 || col + 1 > levelMapObjects[row].Count - 1){
+            aRow.Add(null);
+        }
+        else{
+            aRow.Add(levelMapObjects[row +1][col + 1]);
+        }
+        result.Add(aRow);
+        
+        return result; 
     }
 }
