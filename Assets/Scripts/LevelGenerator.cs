@@ -107,10 +107,31 @@ public class LevelGenerator : MonoBehaviour
                 List< List<GameObject> > surround = checkSurround(row, col);
                 switch(levelMapObjects[row][col].tag){
                     case "innercorner":
-                        //Write innerCorner
+                        //Rotate innerCorner
+                        if(row == 6 && col == 2){
+                            for(int i = 0; i < surround.Count; i++){
+                                for(int j = 0; j < surround[i].Count; j++){
+                                    Debug.Log("surround: " + i + " " + j + " type: " + surround[i][j].tag);
+                                }
+                            }
+                        }
+                        levelMapObjects[row][col].transform.Rotate(0, 0, innerCornerOrient(surround));
                         break;
                     case "innerwall":
-                        //Write inner wall
+                        //Rotate inner wall
+                        if(surround[0][1].tag == "pellet" || surround [2][1].tag == "pellet"){
+                            //pellet above means wall should be rotated to be facing parallel
+                            levelMapObjects[row][col].transform.Rotate(0,0,90);
+                        }
+                        else if(surround[0][1].tag == "innercorner" || surround [2][1].tag == "innercorner" || surround[0][1].tag == "innerwall" || surround [2][1].tag == "innerwall"){
+                            //Don't do anything
+                        }
+                        else if(surround[1][0].tag == "innercorner" || surround[1][0].tag == "innerwall"){
+                            levelMapObjects[row][col].transform.Rotate(0,0,90);
+                        }
+                        else if(surround[1][2].tag == "innercorner" || surround[1][2].tag == "innerwall"){
+                            levelMapObjects[row][col].transform.Rotate(0,0,90);
+                        }
                         break;
                     case "outerwall":
                         if(surround[1][0] != null){
@@ -148,10 +169,10 @@ public class LevelGenerator : MonoBehaviour
                                 levelMapObjects[row][col].transform.Rotate(0, 0, 180);
                                 break;
                             default:
-                                //Not a corner.
+                                //Not a strict corner
                                 //Check if it's on the side, but not a strict corner. then orient to a pellet.
-                                //List< List<GameObject> > surround = checkSurround(row, col);
-                                //Check the corners of the surrounding grid, and find a pellet.
+                                
+                                //Check the location of the walls around it, and connect to them. 
                                 //otherwise orient towards an empty cell.
                                 break;
                         }
@@ -182,6 +203,53 @@ public class LevelGenerator : MonoBehaviour
         }
 
         return "notacorner";
+    }
+
+    int innerCornerOrient(List<List<GameObject>> surround){
+        if(surround[0][1].tag == "innerwall" && surround[1][2].tag == "innerwall"){
+            return 90;
+        }
+        else if(surround[1][2].tag == "innerwall" && surround[2][1].tag == "innerwall"){
+            return 0;
+        }
+        else if(surround[2][1].tag == "innerwall" && surround[1][0].tag == "innerwall"){
+            return 270;
+        }
+        else if(surround[1][0].tag == "innerwall" && surround[0][1].tag == "innerwall"){
+            return 180;
+        }
+
+        //Dealing with corners against corners
+        if(surround[1][2].tag == "innercorner"){
+            if(surround[2][1].tag == "pellet" || surround[2][1].tag == "empty"){
+                return 90;
+            }
+        }
+        else if(surround[1][0].tag == "innercorner"){
+            if(surround[2][1].tag == "pellet" || surround[2][1].tag == "empty"){
+                return 270;
+            }
+            else{
+                return 180;
+            }
+        }
+        else if(surround[2][1].tag == "innercorner"){
+            if(surround[1][0].tag == "pellet" || surround[1][0].tag == "empty"){
+                return 270;
+            }
+        }
+        else if(surround[0][1].tag == "innercorner"){
+            if(surround[1][0].tag == "pellet" || surround[1][0].tag == "empty"){
+                return 180;
+            }
+            else{
+                return 90;
+            }
+        }
+
+
+        //Checks failed/No rotation required, return no rotate.
+        return 0;
     }
 
     List< List<GameObject> > checkSurround(int row, int col){
