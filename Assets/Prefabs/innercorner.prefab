@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4821117734753112938}
   m_Layer: 0
   m_Name: innercorner
-  m_TagString: innerwall
+  m_TagString: innercorner
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
