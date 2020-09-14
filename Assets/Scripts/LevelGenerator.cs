@@ -112,7 +112,6 @@ public class LevelGenerator : MonoBehaviour
                         break;
                     case "innerwall":
                         //Rotate inner wall
-                        //Debug.Log("Called pos: " + row + ":" + col );
                         // if(row == 7 && col == 14){
                         //     for(int i = 0; i < surround.Count; i++){
                         //         for(int j = 0; j < surround[i].Count; j++){
@@ -172,8 +171,27 @@ public class LevelGenerator : MonoBehaviour
                             default:
                                 //Not a strict corner
                                 //Check the location of the walls around it, and connect to them. 
-                                // if(surround[]){
-                                // }
+                                Debug.Log("Called pos: " + row + ":" + col );
+                                if(surround[0][1] != null && surround[1][2] != null){
+                                    if(surround[0][1].tag == "outerwall" && surround[1][2].tag == "outerwall"){
+                                        levelMapObjects[row][col].transform.Rotate(0, 0, 90);
+                                    }
+                                }
+                                if(surround[1][2] != null && surround[2][1] != null){
+                                    if(surround[1][2].tag == "outerwall" && surround[2][1].tag == "outerwall"){
+                                        levelMapObjects[row][col].transform.Rotate(0, 0, 0);
+                                    }
+                                }
+                                if(surround[1][0] != null && surround[2][1] != null){
+                                    if(surround[2][1].tag == "outerwall" && surround[1][0].tag == "outerwall"){
+                                        levelMapObjects[row][col].transform.Rotate(0, 0, 270);
+                                    }
+                                }
+                                if(surround[1][0] != null && surround[0][1] != null){   
+                                    if(surround[1][0].tag == "outerwall" && surround[0][1].tag == "outerwall"){
+                                        levelMapObjects[row][col].transform.Rotate(0, 0, 180);
+                                    }
+                                }
                                 break;
                         }
                         break;
