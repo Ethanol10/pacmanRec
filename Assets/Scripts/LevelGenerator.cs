@@ -108,18 +108,19 @@ public class LevelGenerator : MonoBehaviour
                 switch(levelMapObjects[row][col].tag){
                     case "innercorner":
                         //Rotate innerCorner
-                        if(row == 6 && col == 2){
-                            for(int i = 0; i < surround.Count; i++){
-                                for(int j = 0; j < surround[i].Count; j++){
-                                    Debug.Log("surround: " + i + " " + j + " type: " + surround[i][j].tag);
-                                }
-                            }
-                        }
                         levelMapObjects[row][col].transform.Rotate(0, 0, innerCornerOrient(surround));
                         break;
                     case "innerwall":
                         //Rotate inner wall
-                        if(surround[0][1].tag == "pellet" || surround [2][1].tag == "pellet"){
+                        //Debug.Log("Called pos: " + row + ":" + col );
+                        // if(row == 7 && col == 14){
+                        //     for(int i = 0; i < surround.Count; i++){
+                        //         for(int j = 0; j < surround[i].Count; j++){
+                        //             Debug.Log("surround: " + i + " " + j + " type: " + surround[i][j].tag);
+                        //         }
+                        //     }
+                        // }
+                        if(surround[0][1].tag == "pellet" || surround [2][1].tag == "pellet" || surround[0][1].tag == "empty" || surround [2][1].tag == "empty"){
                             //pellet above means wall should be rotated to be facing parallel
                             levelMapObjects[row][col].transform.Rotate(0,0,90);
                         }
@@ -170,10 +171,9 @@ public class LevelGenerator : MonoBehaviour
                                 break;
                             default:
                                 //Not a strict corner
-                                //Check if it's on the side, but not a strict corner. then orient to a pellet.
-                                
                                 //Check the location of the walls around it, and connect to them. 
-                                //otherwise orient towards an empty cell.
+                                // if(surround[]){
+                                // }
                                 break;
                         }
                         break;
@@ -207,15 +207,36 @@ public class LevelGenerator : MonoBehaviour
 
     int innerCornerOrient(List<List<GameObject>> surround){
         if(surround[0][1].tag == "innerwall" && surround[1][2].tag == "innerwall"){
-            return 90;
+            if(surround[0][0].tag == "innerwall" && surround[0][2].tag == "innerwall"){
+                //do nothing
+            }
+            else if(surround[0][2].tag == "innerwall" && surround[2][2].tag == "innerwall"){
+                //do nothing, again
+            }
+            else{
+                return 90;
+            }
         }
-        else if(surround[1][2].tag == "innerwall" && surround[2][1].tag == "innerwall"){
-            return 0;
+        if(surround[1][2].tag == "innerwall" && surround[2][1].tag == "innerwall"){
+            if(surround[2][0].tag == "innerwall" && surround[2][2].tag == "innerwall"){
+                //do nothing
+            }
+            else if(surround[0][2].tag == "innerwall" && surround[2][2].tag == "innerwall"){
+                //do nothing, again
+            }
+            else{
+                return 0;
+            }
         }
-        else if(surround[2][1].tag == "innerwall" && surround[1][0].tag == "innerwall"){
-            return 270;
+        if(surround[2][1].tag == "innerwall" && surround[1][0].tag == "innerwall"){
+            if(surround[2][0].tag == "innerwall" && surround[2][2].tag == "innerwall"){
+                //do nothing
+            }
+            else{
+                return 270;
+            }
         }
-        else if(surround[1][0].tag == "innerwall" && surround[0][1].tag == "innerwall"){
+        if(surround[1][0].tag == "innerwall" && surround[0][1].tag == "innerwall"){
             return 180;
         }
 
@@ -227,23 +248,26 @@ public class LevelGenerator : MonoBehaviour
         }
         else if(surround[1][0].tag == "innercorner"){
             if(surround[2][1].tag == "pellet" || surround[2][1].tag == "empty"){
-                return 270;
+                return 180;
             }
             else{
-                return 180;
+                return 270;
             }
         }
         else if(surround[2][1].tag == "innercorner"){
             if(surround[1][0].tag == "pellet" || surround[1][0].tag == "empty"){
+                return 0;
+            }
+            else{
                 return 270;
             }
         }
         else if(surround[0][1].tag == "innercorner"){
             if(surround[1][0].tag == "pellet" || surround[1][0].tag == "empty"){
-                return 180;
+                return 90;
             }
             else{
-                return 90;
+                return 180;
             }
         }
 
