@@ -26,8 +26,9 @@ public class Tweener : MonoBehaviour
         //     }
         // }
         if(Vector3.Distance(activeTweens[0].Target.position, activeTweens[0].EndPos) > 0.1f){
-            float x = (currentTime - activeTweens[0].StartTime)/activeTweens[0].Duration;
-            float timeFraction = 1 - Mathf.Cos((x * Mathf.PI) / 2);
+            // float x = (currentTime - activeTweens[0].StartTime)/activeTweens[0].Duration;
+            // float timeFraction = 1 - Mathf.Cos((x * Mathf.PI) / 2);
+            float timeFraction = (currentTime - activeTweens[0].StartTime)/activeTweens[0].Duration;
             activeTweens[0].Target.transform.position = Vector3.Lerp(activeTweens[0].StartPos, activeTweens[0].EndPos, timeFraction);          
         }
         else if(Vector3.Distance(activeTweens[0].Target.position, activeTweens[0].EndPos) <= 0.1f){
@@ -37,9 +38,9 @@ public class Tweener : MonoBehaviour
         }
     }
 
-    public bool AddTween(Transform targetObject, Vector3 startPos, Vector3 endPos, float duration){
+    public bool AddTween(Transform targetObject, Vector3 startPos, Vector3 endPos, float duration, float waitMod){
         // if(!TweenExists(targetObject)){
-            activeTweens.Add(new Tween(targetObject, startPos, endPos, Time.time, duration));
+            activeTweens.Add(new Tween(targetObject, startPos, endPos, Time.time + waitMod, duration));
             return true;
         // }
         // return false;
