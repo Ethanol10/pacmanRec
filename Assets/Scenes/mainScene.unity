@@ -162,6 +162,10 @@ MonoBehaviour:
   - {r: 1, g: 0.72156864, b: 0.32156864, a: 1}
   ghostPrimitive: {fileID: 8119514163210037920, guid: 4c61ba865037452499e5d99ffd972162,
     type: 3}
+  ghostChaseSound: {fileID: 53627510215979036, guid: c0ec7303ca194eb4a8ad361c8cddcc4d,
+    type: 3}
+  startingSound: {fileID: 3842247422776695763, guid: 2503570e4388bc44893060499da96fbb,
+    type: 3}
 --- !u!4 &1009147976
 Transform:
   m_ObjectHideFlags: 0
