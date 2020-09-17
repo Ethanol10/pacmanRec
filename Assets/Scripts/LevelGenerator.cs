@@ -171,7 +171,6 @@ public class LevelGenerator : MonoBehaviour
                             default:
                                 //Not a strict corner
                                 //Check the location of the walls around it, and connect to them. 
-                                Debug.Log("Called pos: " + row + ":" + col );
                                 if(surround[0][1] != null && surround[1][2] != null){
                                     if(surround[0][1].tag == "outerwall" && surround[1][2].tag == "outerwall"){
                                         levelMapObjects[row][col].transform.Rotate(0, 0, 90);
