@@ -12,6 +12,8 @@ TagManager:
   - pellet
   - powerpellet
   - tjunc
+  - title
+  - UIborder
   layers:
   - Default
   - TransparentFX
