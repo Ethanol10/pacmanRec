@@ -37,7 +37,7 @@ public class LevelGenerator : MonoBehaviour
         {1,2,2,2,2,2,2,2,2,2,2,1}
     };
     private List< List<GameObject> > levelMapObjects = new List<List<GameObject>>();
-
+    public bool mapCompleted = false;
     [SerializeField]
     private GameObject[] wallObjectList;
 
@@ -95,6 +95,7 @@ public class LevelGenerator : MonoBehaviour
             yPos = 0;
 
             orientWall();
+            mapCompleted = true;
         }
         
     }
@@ -355,7 +356,7 @@ public class LevelGenerator : MonoBehaviour
         return 0;
     }
 
-    List< List<GameObject> > checkSurround(int row, int col){
+    public List< List<GameObject> > checkSurround(int row, int col){
         List< List<GameObject> > result = new List<List<GameObject>>();
         List<GameObject> aRow = new List<GameObject>();
         

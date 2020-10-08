@@ -454,7 +454,7 @@ GameObject:
   - component: {fileID: 768378167}
   m_Layer: 0
   m_Name: LevelGenerator
-  m_TagString: Untagged
+  m_TagString: levelGen
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -471,6 +471,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f843eaf686364644b86b3afdd2a6a22c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mapCompleted: 0
   wallObjectList:
   - {fileID: 4336978139196934624, guid: 804dcf5f153d7d54ba131e5e7fffc942, type: 3}
   - {fileID: 7482792728155734410, guid: 47a0709d8c24b3a4aaa92d845a5282df, type: 3}
@@ -749,9 +750,9 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 5883470abb879df4e9298c1efd0018bb, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.106
+  m_Volume: 1
   m_Pitch: 1
-  Loop: 1
+  Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -845,6 +846,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e04b3924bbf0dfa43a61d0c69f52193e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  delayAnim: 0.5
+  eatingAudio: {fileID: 8300000, guid: 5883470abb879df4e9298c1efd0018bb, type: 3}
+  movingNoEating: {fileID: 8300000, guid: fda9fe827452fb24bb17808b0a01bbf4, type: 3}
 --- !u!1 &1425295823
 GameObject:
   m_ObjectHideFlags: 0
