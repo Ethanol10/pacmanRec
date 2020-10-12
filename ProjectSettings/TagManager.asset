@@ -15,6 +15,7 @@ TagManager:
   - title
   - UIborder
   - levelGen
+  - teleport
   layers:
   - Default
   - TransparentFX

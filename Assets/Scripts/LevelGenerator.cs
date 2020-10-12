@@ -20,7 +20,7 @@ public class LevelGenerator : MonoBehaviour
     {0,0,0,0,0,2,5,4,4,0,0,0,0,0},
     {0,0,0,0,0,2,5,4,4,0,3,4,4,0},
     {2,2,2,2,2,1,5,3,3,0,4,0,0,0},
-    {0,0,0,0,0,0,5,0,0,0,4,0,0,0},
+    {8,0,0,0,0,0,5,0,0,0,4,0,0,0},
     }; 
     
     int[,] UIborder = 
@@ -42,7 +42,7 @@ public class LevelGenerator : MonoBehaviour
     private GameObject[] wallObjectList;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         if(gameObject.tag == "UIborder"){
             float xPos = -5.625f;
@@ -131,7 +131,10 @@ public class LevelGenerator : MonoBehaviour
                     break;
                 case 7:
                     sublist.Add(Instantiate(wallObjectList[7], new Vector3(xPos, yPos, 0), Quaternion.identity));
-                    break;    
+                    break;  
+                case 8:
+                    sublist.Add(Instantiate(wallObjectList[8], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
             }
         }
         else{
@@ -160,6 +163,9 @@ public class LevelGenerator : MonoBehaviour
                 case 7:
                     sublist.Add(Instantiate(wallObjectList[7], new Vector3(xPos, yPos, 0), Quaternion.identity));
                     break;    
+                case 8:
+                    sublist.Add(Instantiate(wallObjectList[8], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
             }
         }
     }

@@ -58,6 +58,10 @@ public class Tweener : MonoBehaviour
         // return false;
     //}
 
+    public void destroyTween(){
+        activeTween = null;
+    }
+
     public bool tweenActive(){
         return (activeTween != null);
     }
