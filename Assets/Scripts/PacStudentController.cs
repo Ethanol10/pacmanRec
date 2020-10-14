@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PacStudentController : MonoBehaviour
 {
@@ -22,9 +23,18 @@ public class PacStudentController : MonoBehaviour
     [SerializeField]
     private AudioSource wallAudioSource;
     
+    public GameObject emptySquare;
+
+    public Canvas HUD;
+    public Text Score;
+    private int playerScore;
+
+    private GhostHandler ghostHandler;
+    
     // Start is called before the first frame update
     void Start()
     {
+        playerScore = 0;
         tweener = GetComponent<Tweener>();
         LevelGeneratorObj = GameObject.FindWithTag("levelGen").GetComponent<LevelGenerator>();
         TeleporterObj = GameObject.FindWithTag("levelGen").GetComponent<Teleporter>();
@@ -33,7 +43,9 @@ public class PacStudentController : MonoBehaviour
         movingAudio = GetComponent<AudioSource>();
         playerAnimator = GetComponent<Animator>();
         dustParticles = GetComponent<ParticleSystem>();
-        
+        ghostHandler = GameObject.FindWithTag("ghosthandler").GetComponent<GhostHandler>();
+        Score = HUD.transform.GetChild(2).gameObject.GetComponent<Text>();
+
         bool done = false;
         while(!done){
             for(int i = 0; i < levelMapObjects.Count; i++){
@@ -45,6 +57,7 @@ public class PacStudentController : MonoBehaviour
                 }
             }
         }
+
     }
 
     // Update is called once per frame
@@ -169,16 +182,20 @@ public class PacStudentController : MonoBehaviour
                 dustParticles.Stop();
             }
         }
+        updateUI();
     }
 
     private void switchAudio(string type){
-        if(type == "pellet" || type == "powerpellet"){
-            movingAudio.clip = eatingAudio;
+        if(!movingAudio.isPlaying){
+            if(type == "pellet" || type == "powerpellet"){
+                movingAudio.clip = eatingAudio;
+            }
+            else if(type == "empty"){
+                movingAudio.clip = movingNoEating;
+            }
+            
+            movingAudio.Play();
         }
-        else if(type == "empty"){
-            movingAudio.clip = movingNoEating;
-        }
-        movingAudio.Play();
     }
 
     private void updateSurround(){
@@ -194,5 +211,24 @@ public class PacStudentController : MonoBehaviour
         //         Debug.Log("row:col: " + row + ":" + col + " lmo: " + levelMapObjects[row][col].tag );
         //     }
         // }
+    }
+
+    void OnTriggerEnter(Collider other){
+        if(other.gameObject.tag == "pellet" || other.gameObject.tag == "powerpellet"){
+            if(other.gameObject.tag == "powerpellet"){
+                ghostHandler.setGhostState("scared");
+            }
+            switchAudio("pellet");
+            playerScore += 10; 
+            levelMapObjects[(int)gridPos.x][(int)gridPos.y] = Instantiate(emptySquare, other.gameObject.transform.position, Quaternion.identity);
+            Destroy(other.gameObject);
+        }
+        if(other.gameObject.tag == "cherry"){
+            playerScore += 100;
+        }
+    }
+
+    private void updateUI(){
+        Score.text = "Score: " + playerScore;
     }
 }   

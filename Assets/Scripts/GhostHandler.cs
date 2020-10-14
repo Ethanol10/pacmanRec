@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GhostHandler : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class GhostHandler : MonoBehaviour
     
     private List<Ghost> ghosts = new List<Ghost>();
     private float timer = 0;
+    private bool timerActive;
     private int eyeNum = 0;
 
     [SerializeField]
@@ -25,10 +27,13 @@ public class GhostHandler : MonoBehaviour
     [SerializeField]
     private List<Vector3> position;
 
-    private int repeater = 0;
+    [SerializeField]
+    private float scaredTimerLimit;
+
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
+        //Create the starting noise, and the ghostchase sounds, and activate if on title.
         startingSound = Instantiate(startingSound, new Vector3(0, 0, 0), Quaternion.identity);
         ghostChaseSound = Instantiate(ghostChaseSound, new Vector3(0, 0, 0), Quaternion.identity);
         if(gameObject.tag != "title"){
@@ -41,10 +46,10 @@ public class GhostHandler : MonoBehaviour
         }
 
         for(int i = 0; i < 4; i++){
+            Debug.Log("shit" + i);
             GameObject newGhostShape = Instantiate(ghostPrimitive, new Vector3(position[i].x, position[i].y, 0), Quaternion.identity);
-            GameObject newEyeState = Instantiate(eyes[0], new Vector3(position[i].x, position[i].y, -0.1f), Quaternion.identity);
             newGhostShape.GetComponent<SpriteRenderer>().color = ghostColor[i];
-            Ghost newGhost = new Ghost(newGhostShape, newEyeState);
+            Ghost newGhost = new Ghost(newGhostShape, eyes);
             ghosts.Add(newGhost);
         }
     }
@@ -56,6 +61,22 @@ public class GhostHandler : MonoBehaviour
             if(!ghostChaseSound.GetComponent<AudioSource>().isPlaying){
                 ghostChaseSound.GetComponent<AudioSource>().enabled = true;
                 ghostChaseSound.GetComponent<AudioSource>().Play(0);
+            }
+            if(timerActive){
+                timer+= Time.deltaTime;
+                Debug.Log(timer);
+                if(scaredTimerLimit - timer < 3){
+                    setGhostState("recovering");
+                }
+                if(timer > scaredTimerLimit){
+                    timer = 0;
+                    setGhostState("alive");
+                    timerActive = false;
+                }
+            }   
+            for(int i = 0; i < ghosts.Count; i++){
+                ghosts[i].updateHUD(scaredTimerLimit - timer);
+                ghosts[i].ghostUpdate();
             }
         }
         // if(ghostAnimator[0].GetCurrentAnimatorStateInfo(0).IsName("ghostMoving")){
@@ -109,5 +130,14 @@ public class GhostHandler : MonoBehaviour
         //         ghostEyeState[i].SetActive(true);
         //     }
         // }
+    }
+
+    public void setGhostState(string ghostState){
+        for(int i = 0; i < ghosts.Count; i++){
+            if(ghostState == "scared"){
+                timerActive = true;
+            }
+            ghosts[i].setGhostState(ghostState);
+        }
     }
 }

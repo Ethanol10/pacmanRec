@@ -16,6 +16,8 @@ TagManager:
   - UIborder
   - levelGen
   - teleport
+  - cherry
+  - ghosthandler
   layers:
   - Default
   - TransparentFX

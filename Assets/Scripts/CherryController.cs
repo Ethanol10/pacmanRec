@@ -37,4 +37,8 @@ public class CherryController : MonoBehaviour
             timer = 0.0f;
         }
     }
+    void OnTriggerEnter(Collider other){
+        gameObject.transform.position = leftPos[0];
+        tweener.destroyTween();
+    }
 }
