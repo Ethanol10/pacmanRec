@@ -13,13 +13,19 @@ public class Ghost
         ALIVE,
         SCARED,
         RECOVERING,
-        DEAD
+        DEAD,
+        PLAYERDEAD
     };
 
     public GhostState state;
     public Animator ghostAnimator;
 
-    public Ghost(GameObject ghost, List<GameObject> eyes){
+    private float scaredTimer = 0.0f;
+    private float scaredTimerLimit;
+    private float deadTimer = 0.0f;
+    private float deadTimerLimit = 5.0f;
+
+    public Ghost(GameObject ghost, List<GameObject> eyes, int inpScaredTimerLimit){
         GhostShape = ghost;
         Eyes = eyes;
         state = GhostState.ALIVE;
@@ -27,9 +33,28 @@ public class Ghost
         eye = MonoBehaviour.Instantiate(Eyes[0], GhostShape.transform.position + new Vector3(0, 0, -1), Quaternion.identity);
         timer = GhostShape.transform.GetChild(0).transform.GetChild(0).GetComponent<Text>();
         GhostShape.transform.GetChild(0).gameObject.SetActive(false);
+        scaredTimerLimit = inpScaredTimerLimit;
     }
 
     public void ghostUpdate(){
+        if(state == GhostState.DEAD){       
+            deadTimer += Time.deltaTime;
+            if(deadTimer > deadTimerLimit){
+                deadTimer = 0.0f;
+                setGhostState("alive");
+            }
+        }
+        else if(state == GhostState.SCARED || state == GhostState.RECOVERING){
+            scaredTimer += Time.deltaTime;
+            if(scaredTimer > scaredTimerLimit){
+                setGhostState("alive");
+                scaredTimer = 0.0f;
+            }
+            else if(scaredTimer > scaredTimerLimit - 3 ){
+                setGhostState("recovering");
+            }
+            updateHUD(scaredTimerLimit - scaredTimer);
+        }
         animationUpdate();
     }
 
@@ -56,6 +81,10 @@ public class Ghost
             ghostAnimator.SetBool("isRecovering", false);
             ghostAnimator.SetBool("isDead", false);
         }
+        if(state == GhostState.PLAYERDEAD){
+            eye.SetActive(false);
+            GhostShape.SetActive(false);
+        }
     }
 
     public void updateHUD(float timeLeft){
@@ -68,6 +97,10 @@ public class Ghost
 
     public GameObject getGhostEyes(){
         return eye;
+    }
+
+    public GhostState GetGhostState(){
+        return state;
     }
     
     public void setEyeState(string eyeString){

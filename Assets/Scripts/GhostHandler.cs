@@ -29,6 +29,10 @@ public class GhostHandler : MonoBehaviour
 
     [SerializeField]
     private float scaredTimerLimit;
+    [SerializeField]
+    private AudioClip deadGhostRunningBack;
+    [SerializeField]
+    private AudioClip chasingGhost;
 
     // Start is called before the first frame update
     void Awake()
@@ -46,10 +50,9 @@ public class GhostHandler : MonoBehaviour
         }
 
         for(int i = 0; i < 4; i++){
-            Debug.Log("shit" + i);
             GameObject newGhostShape = Instantiate(ghostPrimitive, new Vector3(position[i].x, position[i].y, 0), Quaternion.identity);
             newGhostShape.GetComponent<SpriteRenderer>().color = ghostColor[i];
-            Ghost newGhost = new Ghost(newGhostShape, eyes);
+            Ghost newGhost = new Ghost(newGhostShape, eyes, (int)scaredTimerLimit);
             ghosts.Add(newGhost);
         }
     }
@@ -59,23 +62,21 @@ public class GhostHandler : MonoBehaviour
     {   
         if(!startingSound.GetComponent<AudioSource>().isPlaying && gameObject.tag != "title"){
             if(!ghostChaseSound.GetComponent<AudioSource>().isPlaying){
-                ghostChaseSound.GetComponent<AudioSource>().enabled = true;
-                ghostChaseSound.GetComponent<AudioSource>().Play(0);
+                for(int i = 0; i < ghosts.Count; i++){
+                    if(ghosts[i].GetGhostState() == Ghost.GhostState.DEAD){
+                        ghostChaseSound.GetComponent<AudioSource>().clip = deadGhostRunningBack;
+                        ghostChaseSound.GetComponent<AudioSource>().enabled = true;
+                        ghostChaseSound.GetComponent<AudioSource>().Play(0);
+                        i = ghosts.Count;
+                    }
+                    else{
+                        ghostChaseSound.GetComponent<AudioSource>().clip = chasingGhost;
+                        ghostChaseSound.GetComponent<AudioSource>().enabled = true;
+                        ghostChaseSound.GetComponent<AudioSource>().Play(0);
+                    }
+                }
             }
-            if(timerActive){
-                timer+= Time.deltaTime;
-                Debug.Log(timer);
-                if(scaredTimerLimit - timer < 3){
-                    setGhostState("recovering");
-                }
-                if(timer > scaredTimerLimit){
-                    timer = 0;
-                    setGhostState("alive");
-                    timerActive = false;
-                }
-            }   
             for(int i = 0; i < ghosts.Count; i++){
-                ghosts[i].updateHUD(scaredTimerLimit - timer);
                 ghosts[i].ghostUpdate();
             }
         }
@@ -139,5 +140,9 @@ public class GhostHandler : MonoBehaviour
             }
             ghosts[i].setGhostState(ghostState);
         }
+    }
+
+    public List<Ghost> GetGhosts(){
+        return ghosts;
     }
 }

@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PacStudentController : MonoBehaviour
 {
     private Tweener tweener;
+    private Vector3 spawnPoint = new Vector3(1.25f, -1.25f, 0);
     private List<List<GameObject>> levelMapObjects;
     private List<List<GameObject>> surroundLMObjects;
     private LevelGenerator LevelGeneratorObj;
@@ -17,6 +19,11 @@ public class PacStudentController : MonoBehaviour
     public AudioClip eatingAudio;
     public AudioClip movingNoEating;
 
+    [SerializeField]
+    private GameObject deathSoundObj;
+    private GameObject deathSound;
+    public AudioClip firstDeathSound;
+    public AudioClip secondDeathSound;
     private Animator playerAnimator;
     private ParticleSystem dustParticles;
 
@@ -27,9 +34,33 @@ public class PacStudentController : MonoBehaviour
 
     public Canvas HUD;
     public Text Score;
+    public Text Lives;
+    public Text gameTimer;
     private int playerScore;
 
+    private int playerLives;
+
+    private float playerTimer;
+
     private GhostHandler ghostHandler;
+    public GameObject deathExplosionObj;
+    private ParticleSystem deathExplosion;
+    private PacmanStates playerState;
+
+    private float deadTimer;
+    public float deathWait;
+    enum PacmanStates{
+        ALIVE,
+        DEAD
+    }
+
+    private float startTimer;
+    private bool initialCountdownDone = false;
+    public Sprite three;
+    public Sprite two;
+    public Sprite one;
+    public Sprite go;
+    public Image countdown;
     
     // Start is called before the first frame update
     void Start()
@@ -45,7 +76,19 @@ public class PacStudentController : MonoBehaviour
         dustParticles = GetComponent<ParticleSystem>();
         ghostHandler = GameObject.FindWithTag("ghosthandler").GetComponent<GhostHandler>();
         Score = HUD.transform.GetChild(2).gameObject.GetComponent<Text>();
-
+        Lives = HUD.transform.GetChild(5).gameObject.GetComponent<Text>();
+        gameTimer = HUD.transform.GetChild(0).gameObject.GetComponent<Text>();
+        Instantiate(deathExplosionObj, new Vector3(0,0,0), Quaternion.identity);
+        deathExplosion = deathExplosionObj.GetComponent<ParticleSystem>();
+        deathExplosion.Stop();
+        playerState = PacmanStates.ALIVE;
+        playerLives = 3;
+        deadTimer = 0.0f;
+        deathSound = Instantiate(deathSoundObj, new Vector3(0,0,0), Quaternion.identity);
+        startTimer = 0.0f;
+        countdown = HUD.transform.GetChild(6).GetComponent<Image>();
+        playerTimer = 0.0f;
+        
         bool done = false;
         while(!done){
             for(int i = 0; i < levelMapObjects.Count; i++){
@@ -62,127 +105,168 @@ public class PacStudentController : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
-        updateSurround();
-        if(Input.GetKey("w")){
-            playerAnimator.enabled = true;
-            if(!dustParticles.isPlaying){
-                dustParticles.Play();
+    {   
+        if(!initialCountdownDone){
+            startTimer += Time.deltaTime;
+            if(startTimer < 1){
+                countdown.sprite = three;
+            }   
+            else if(startTimer < 2){
+                countdown.sprite = two;
             }
-            if(!tweener.tweenActive()){
-                // lastKey = 'w';
-                transform.rotation = Quaternion.Euler(0, 0, 90);
-                if(surroundLMObjects[0][1].tag == "pellet" || surroundLMObjects[0][1].tag == "powerpellet" || surroundLMObjects[0][1].tag == "empty"){
-                    switchAudio(surroundLMObjects[0][1].tag);
-                    tweener.AddTween(gameObject.transform, 
-                        gameObject.transform.position, 
-                        new Vector3(gameObject.transform.position.x,gameObject.transform.position.y + 1.25f, 0), 
-                        delayAnim);
-                    gridPos += new Vector2(-1, 0);
-                    
-                }
-                else if(surroundLMObjects[0][1].tag == "innerwall" || surroundLMObjects[0][1].tag == "outerwall" || surroundLMObjects[0][1].tag == "outercorner" || surroundLMObjects[0][1].tag == "innercorner"){
-                    if(!wallAudioSource.isPlaying){
-                       wallAudioSource.Play();
-                    }
-                }
-                else if(surroundLMObjects[0][1].tag == "teleport"){
-                    gridPos = TeleporterObj.swapPosition(gameObject.transform);
-                }
+            else if(startTimer < 3){
+                countdown.sprite = one;
+            }
+            else if(startTimer < 4){
+                countdown.sprite = go;
+            }
+            else if(startTimer > 4){
+                countdown.enabled = false;
+                initialCountdownDone = true;
             }
         }
-        else if(Input.GetKey("a")){
-            playerAnimator.enabled = true;
-            if(!dustParticles.isPlaying){
-                dustParticles.Play();
+
+        if(initialCountdownDone){
+            playerTimer += Time.deltaTime;
+            updateSurround();
+            if(playerState == PacmanStates.ALIVE){
+                if(Input.GetKey("w")){
+                    playerAnimator.enabled = true;
+                    if(!dustParticles.isPlaying){
+                        dustParticles.Play();
+                    }
+                    if(!tweener.tweenActive()){
+                        // lastKey = 'w';
+                        transform.rotation = Quaternion.Euler(0, 0, 90);
+                        if(surroundLMObjects[0][1].tag == "pellet" || surroundLMObjects[0][1].tag == "powerpellet" || surroundLMObjects[0][1].tag == "empty"){
+                            switchAudio(surroundLMObjects[0][1].tag);
+                            tweener.AddTween(gameObject.transform, 
+                                gameObject.transform.position, 
+                                new Vector3(gameObject.transform.position.x,gameObject.transform.position.y + 1.25f, 0), 
+                                delayAnim);
+                            gridPos += new Vector2(-1, 0);
+                            
+                        }
+                        else if(surroundLMObjects[0][1].tag == "innerwall" || surroundLMObjects[0][1].tag == "outerwall" || surroundLMObjects[0][1].tag == "outercorner" || surroundLMObjects[0][1].tag == "innercorner"){
+                            if(!wallAudioSource.isPlaying){
+                            wallAudioSource.Play();
+                            }
+                        }
+                        else if(surroundLMObjects[0][1].tag == "teleport"){
+                            gridPos = TeleporterObj.swapPosition(gameObject.transform);
+                        }
+                    }
+                }
+                else if(Input.GetKey("a")){
+                    playerAnimator.enabled = true;
+                    if(!dustParticles.isPlaying){
+                        dustParticles.Play();
+                    }
+                    if(!tweener.tweenActive()){
+                        //lastKey = 'a';
+                        transform.rotation = Quaternion.Euler(0, 0, 180);
+                        if(surroundLMObjects[1][0] == null){
+                            //do Nothing
+                        }
+                        else if(surroundLMObjects[1][0].tag == "pellet" || surroundLMObjects[1][0].tag == "powerpellet" || surroundLMObjects[1][0].tag == "empty" || surroundLMObjects[1][0].tag == "teleport"){
+                            if(surroundLMObjects[1][0].tag == "teleport"){
+                                gridPos = TeleporterObj.swapPosition(gameObject.transform);
+                            }
+                            switchAudio(surroundLMObjects[1][0].tag);
+                            tweener.AddTween(gameObject.transform, 
+                                gameObject.transform.position, 
+                                new Vector3(gameObject.transform.position.x - 1.25f ,gameObject.transform.position.y, 0), 
+                                delayAnim);
+                            if(!(gridPos.y - 1 < 0)){
+                                gridPos += new Vector2(0, -1);     
+                            }
+                        }
+                        else if(surroundLMObjects[1][0].tag == "innerwall" || surroundLMObjects[1][0].tag == "outerwall" || surroundLMObjects[1][0].tag == "outercorner" || surroundLMObjects[1][0].tag == "innercorner"){
+                            if(!wallAudioSource.isPlaying){
+                            wallAudioSource.Play();
+                            }
+                        }
+                    }
+                    
+                }
+                else if(Input.GetKey("s")){
+                    playerAnimator.enabled = true;
+                    if(!dustParticles.isPlaying){
+                        dustParticles.Play();
+                    }
+                    if(!tweener.tweenActive()){
+                        //lastKey = 's';
+                        transform.rotation = Quaternion.Euler(0, 0, 270);
+                        if(surroundLMObjects[2][1].tag == "pellet" || surroundLMObjects[2][1].tag == "powerpellet" || surroundLMObjects[2][1].tag == "empty"){
+                            switchAudio(surroundLMObjects[2][1].tag);
+                            tweener.AddTween(gameObject.transform, 
+                                gameObject.transform.position, 
+                                new Vector3(gameObject.transform.position.x,gameObject.transform.position.y - 1.25f, 0), 
+                                delayAnim);
+                            gridPos += new Vector2(1, 0);
+                        }
+                        else if(surroundLMObjects[2][1].tag == "innerwall" || surroundLMObjects[2][1].tag == "outerwall" || surroundLMObjects[2][1].tag == "outercorner" || surroundLMObjects[2][1].tag == "innercorner"){
+                            if(!wallAudioSource.isPlaying){
+                            wallAudioSource.Play();
+                            }
+                        }
+                        else if(surroundLMObjects[2][1].tag == "teleport"){
+                            gridPos = TeleporterObj.swapPosition(gameObject.transform);
+                        }
+                    }
+                }
+                else if(Input.GetKey("d")){
+                    playerAnimator.enabled = true;
+                    if(!dustParticles.isPlaying){
+                        dustParticles.Play();
+                    }
+                    if(!tweener.tweenActive()){
+                        //lastKey = 'd';
+                        transform.rotation = Quaternion.Euler(0, 0, 0);
+                        if(surroundLMObjects[1][2].tag == "pellet" || surroundLMObjects[1][2].tag == "powerpellet" || surroundLMObjects[1][2].tag == "empty"){
+                            switchAudio(surroundLMObjects[1][2].tag);
+                            tweener.AddTween(gameObject.transform, 
+                                gameObject.transform.position, 
+                                new Vector3(gameObject.transform.position.x + 1.25f ,gameObject.transform.position.y, 0), 
+                                delayAnim);
+                            gridPos += new Vector2(0, 1);
+                        }
+                        else if(surroundLMObjects[1][2].tag == "innerwall" || surroundLMObjects[1][2].tag == "outerwall" || surroundLMObjects[1][2].tag == "outercorner" || surroundLMObjects[1][2].tag == "innercorner"){
+                            if(!wallAudioSource.isPlaying){
+                            wallAudioSource.Play();
+                            }
+                        }
+                        else if(surroundLMObjects[1][2].tag == "teleport"){
+                            gridPos = TeleporterObj.swapPosition(gameObject.transform);
+                        }
+                    }
+                }
+                else{
+                    if(!tweener.tweenActive()){
+                        playerAnimator.enabled = false;
+                        dustParticles.Stop();
+                    }
+                }
             }
-            if(!tweener.tweenActive()){
-                //lastKey = 'a';
-                transform.rotation = Quaternion.Euler(0, 0, 180);
-                if(surroundLMObjects[1][0] == null){
-                    //do Nothing
-                }
-                else if(surroundLMObjects[1][0].tag == "pellet" || surroundLMObjects[1][0].tag == "powerpellet" || surroundLMObjects[1][0].tag == "empty" || surroundLMObjects[1][0].tag == "teleport"){
-                    if(surroundLMObjects[1][0].tag == "teleport"){
-                        gridPos = TeleporterObj.swapPosition(gameObject.transform);
-                        Debug.Log(gridPos);
+            else if(playerState == PacmanStates.DEAD){
+                //ghostAnimator[0].GetCurrentAnimatorStateInfo(0).IsName("ghostMoving")
+                deadTimer += Time.deltaTime;
+                if(deadTimer >= deathWait){
+                    if(playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("pacmanMoving")){
+                        playerState = PacmanStates.ALIVE;
+                        playerAnimator.SetBool("isDead", false);
+                        gameObject.transform.position = spawnPoint;
+                        gridPos = new Vector2(1,1);
+                        deadTimer = 0;
                     }
-                    switchAudio(surroundLMObjects[1][0].tag);
-                    tweener.AddTween(gameObject.transform, 
-                        gameObject.transform.position, 
-                        new Vector3(gameObject.transform.position.x - 1.25f ,gameObject.transform.position.y, 0), 
-                        delayAnim);
-                    if(!(gridPos.y - 1 < 0)){
-                        gridPos += new Vector2(0, -1);     
-                    }
-                }
-                else if(surroundLMObjects[1][0].tag == "innerwall" || surroundLMObjects[1][0].tag == "outerwall" || surroundLMObjects[1][0].tag == "outercorner" || surroundLMObjects[1][0].tag == "innercorner"){
-                    if(!wallAudioSource.isPlaying){
-                       wallAudioSource.Play();
+                    if(dustParticles.isPlaying){
+                        dustParticles.Stop();
                     }
                 }
             }
             
+            updateUI();
         }
-        else if(Input.GetKey("s")){
-            playerAnimator.enabled = true;
-            if(!dustParticles.isPlaying){
-                dustParticles.Play();
-            }
-            if(!tweener.tweenActive()){
-                //lastKey = 's';
-                transform.rotation = Quaternion.Euler(0, 0, 270);
-                if(surroundLMObjects[2][1].tag == "pellet" || surroundLMObjects[2][1].tag == "powerpellet" || surroundLMObjects[2][1].tag == "empty"){
-                    switchAudio(surroundLMObjects[2][1].tag);
-                    tweener.AddTween(gameObject.transform, 
-                        gameObject.transform.position, 
-                        new Vector3(gameObject.transform.position.x,gameObject.transform.position.y - 1.25f, 0), 
-                        delayAnim);
-                    gridPos += new Vector2(1, 0);
-                }
-                else if(surroundLMObjects[2][1].tag == "innerwall" || surroundLMObjects[2][1].tag == "outerwall" || surroundLMObjects[2][1].tag == "outercorner" || surroundLMObjects[2][1].tag == "innercorner"){
-                    if(!wallAudioSource.isPlaying){
-                       wallAudioSource.Play();
-                    }
-                }
-                else if(surroundLMObjects[2][1].tag == "teleport"){
-                    gridPos = TeleporterObj.swapPosition(gameObject.transform);
-                }
-            }
-        }
-        else if(Input.GetKey("d")){
-            playerAnimator.enabled = true;
-            if(!dustParticles.isPlaying){
-                dustParticles.Play();
-            }
-            if(!tweener.tweenActive()){
-                //lastKey = 'd';
-                transform.rotation = Quaternion.Euler(0, 0, 0);
-                if(surroundLMObjects[1][2].tag == "pellet" || surroundLMObjects[1][2].tag == "powerpellet" || surroundLMObjects[1][2].tag == "empty"){
-                    switchAudio(surroundLMObjects[1][2].tag);
-                    tweener.AddTween(gameObject.transform, 
-                        gameObject.transform.position, 
-                        new Vector3(gameObject.transform.position.x + 1.25f ,gameObject.transform.position.y, 0), 
-                        delayAnim);
-                    gridPos += new Vector2(0, 1);
-                }
-                else if(surroundLMObjects[1][2].tag == "innerwall" || surroundLMObjects[1][2].tag == "outerwall" || surroundLMObjects[1][2].tag == "outercorner" || surroundLMObjects[1][2].tag == "innercorner"){
-                    if(!wallAudioSource.isPlaying){
-                       wallAudioSource.Play();
-                    }
-                }
-                else if(surroundLMObjects[1][2].tag == "teleport"){
-                    gridPos = TeleporterObj.swapPosition(gameObject.transform);
-                }
-            }
-        }
-        else{
-            if(!tweener.tweenActive()){
-                playerAnimator.enabled = false;
-                dustParticles.Stop();
-            }
-        }
-        updateUI();
     }
 
     private void switchAudio(string type){
@@ -226,9 +310,57 @@ public class PacStudentController : MonoBehaviour
         if(other.gameObject.tag == "cherry"){
             playerScore += 100;
         }
+        if(other.gameObject.tag == "ghost"){
+            if(other.gameObject.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("scaredGhost") || other.gameObject.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("recoveringGhost")){
+                playerScore += 300;
+                other.gameObject.GetComponent<Animator>().SetBool("isDead", true);
+                List<Ghost> ghosts = ghostHandler.GetGhosts();
+                for(int i = 0; i < ghosts.Count; i++){
+                    if(ghosts[i].getGhostShape().GetInstanceID() == other.gameObject.GetInstanceID()){
+                        ghosts[i].setGhostState("dead");
+                    }
+                }
+            }
+            else if(other.gameObject.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("ghostMoving")){
+                Debug.Log("ping");
+                playerLives -= 1;
+                playerAnimator.SetBool("isDead", true);
+                playerState = PacmanStates.DEAD;
+                //wait for 0.5 seconds
+                //play death animation
+                //when changing to the final few frames, play exploding sound.
+                //respawn the player at grid(1, 1)
+                //
+                if(playerLives < 0){
+                    Debug.Log("Game Over");
+                }
+            }
+        }
     }
 
     private void updateUI(){
+        TimeSpan time = TimeSpan.FromSeconds(playerTimer);
+
+        //here backslash is must to tell that colon is
+        //not the part of format, it just a character that we want in output
+        string str = time.ToString(@"mm\:ss\:ff");
         Score.text = "Score: " + playerScore;
+        Lives.text = "X " + playerLives;
+        gameTimer.text = "TIME: " + str;
+    }
+
+    public void playFirstDeathAudio(){
+        AudioSource dead = deathSound.GetComponent<AudioSource>();
+        dead.clip = firstDeathSound;
+        dead.Play();
+        if(!deathExplosion.isPlaying){
+            deathExplosion.Play();
+        }
+    }
+
+    public void playSecondDeathAudio(){
+        AudioSource dead = deathSound.GetComponent<AudioSource>();
+        dead.clip = secondDeathSound;
+        dead.Play();
     }
 }   

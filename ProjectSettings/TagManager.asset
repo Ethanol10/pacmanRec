@@ -18,6 +18,8 @@ TagManager:
   - teleport
   - cherry
   - ghosthandler
+  - ghosttimer
+  - ghost
   layers:
   - Default
   - TransparentFX
