@@ -33,6 +33,8 @@ public class GhostHandler : MonoBehaviour
     private AudioClip deadGhostRunningBack;
     [SerializeField]
     private AudioClip chasingGhost;
+    public Canvas HUD;
+    private Text ghostTimer;
 
     // Start is called before the first frame update
     void Awake()
@@ -43,6 +45,8 @@ public class GhostHandler : MonoBehaviour
         if(gameObject.tag != "title"){
             startingSound.GetComponent<AudioSource>().enabled = true;
             ghostChaseSound.GetComponent<AudioSource>().enabled = true; 
+            ghostTimer = HUD.transform.GetChild(3).GetComponent<Text>();
+            ghostTimer.enabled = false;
         }
         else{
             startingSound.GetComponent<AudioSource>().enabled = false;
@@ -52,9 +56,10 @@ public class GhostHandler : MonoBehaviour
         for(int i = 0; i < 4; i++){
             GameObject newGhostShape = Instantiate(ghostPrimitive, new Vector3(position[i].x, position[i].y, 0), Quaternion.identity);
             newGhostShape.GetComponent<SpriteRenderer>().color = ghostColor[i];
-            Ghost newGhost = new Ghost(newGhostShape, eyes, (int)scaredTimerLimit);
+            Ghost newGhost = new Ghost(newGhostShape, eyes, (int)scaredTimerLimit, i);
             ghosts.Add(newGhost);
         }
+
     }
 
     // Update is called once per frame
@@ -78,6 +83,17 @@ public class GhostHandler : MonoBehaviour
             }
             for(int i = 0; i < ghosts.Count; i++){
                 ghosts[i].ghostUpdate();
+            }
+        }
+        if(timerActive){
+            ghostTimer.enabled = true;
+            timer += Time.deltaTime;
+            int timeleft = (int)scaredTimerLimit - (int)timer;
+            ghostTimer.text = "Ghost Timer: " + timeleft;
+            if(timer > scaredTimerLimit){
+                ghostTimer.enabled = false;
+                timerActive = false;
+                timer = 0.0f;
             }
         }
         // if(ghostAnimator[0].GetCurrentAnimatorStateInfo(0).IsName("ghostMoving")){

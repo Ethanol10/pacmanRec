@@ -25,7 +25,7 @@ public class Ghost
     private float deadTimer = 0.0f;
     private float deadTimerLimit = 5.0f;
 
-    public Ghost(GameObject ghost, List<GameObject> eyes, int inpScaredTimerLimit){
+    public Ghost(GameObject ghost, List<GameObject> eyes, int inpScaredTimerLimit, int number){
         GhostShape = ghost;
         Eyes = eyes;
         state = GhostState.ALIVE;
@@ -34,6 +34,7 @@ public class Ghost
         timer = GhostShape.transform.GetChild(0).transform.GetChild(0).GetComponent<Text>();
         GhostShape.transform.GetChild(0).gameObject.SetActive(false);
         scaredTimerLimit = inpScaredTimerLimit;
+        timer.text = "" + number + 1;
     }
 
     public void ghostUpdate(){
@@ -48,12 +49,10 @@ public class Ghost
             scaredTimer += Time.deltaTime;
             if(scaredTimer > scaredTimerLimit){
                 setGhostState("alive");
-                scaredTimer = 0.0f;
             }
             else if(scaredTimer > scaredTimerLimit - 3 ){
                 setGhostState("recovering");
             }
-            updateHUD(scaredTimerLimit - scaredTimer);
         }
         animationUpdate();
     }
@@ -61,22 +60,18 @@ public class Ghost
     public void animationUpdate(){
         if(state == GhostState.SCARED){
             eye.SetActive(false);
-            GhostShape.transform.GetChild(0).gameObject.SetActive(true);
             ghostAnimator.SetBool("isScared", true);
         }
         if(state == GhostState.RECOVERING){
             eye.SetActive(false);
-            GhostShape.transform.GetChild(0).gameObject.SetActive(true);
             ghostAnimator.SetBool("isRecovering", true);
         }
         if(state == GhostState.DEAD){
             eye.SetActive(true);
-            GhostShape.transform.GetChild(0).gameObject.SetActive(false);
             ghostAnimator.SetBool("isDead", true);
         }
         if(state == GhostState.ALIVE){
             eye.SetActive(true);
-            GhostShape.transform.GetChild(0).gameObject.SetActive(false);
             ghostAnimator.SetBool("isScared", false);
             ghostAnimator.SetBool("isRecovering", false);
             ghostAnimator.SetBool("isDead", false);
@@ -85,10 +80,6 @@ public class Ghost
             eye.SetActive(false);
             GhostShape.SetActive(false);
         }
-    }
-
-    public void updateHUD(float timeLeft){
-        timer.text = "" + (int)timeLeft;
     }
 
     public GameObject getGhostShape(){

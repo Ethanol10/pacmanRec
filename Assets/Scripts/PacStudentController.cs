@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PacStudentController : MonoBehaviour
 {
@@ -56,11 +57,14 @@ public class PacStudentController : MonoBehaviour
 
     private float startTimer;
     private bool initialCountdownDone = false;
+    private bool gameOver = false;
     public Sprite three;
     public Sprite two;
     public Sprite one;
     public Sprite go;
-    public Image countdown;
+    public Sprite gameOverSprite;
+    private Image countdown;
+    private int pelletLeft;
     
     // Start is called before the first frame update
     void Start()
@@ -88,7 +92,9 @@ public class PacStudentController : MonoBehaviour
         startTimer = 0.0f;
         countdown = HUD.transform.GetChild(6).GetComponent<Image>();
         playerTimer = 0.0f;
-        
+        pelletLeft = 0;
+
+
         bool done = false;
         while(!done){
             for(int i = 0; i < levelMapObjects.Count; i++){
@@ -96,6 +102,9 @@ public class PacStudentController : MonoBehaviour
                     if(levelMapObjects[i][j].tag == "innerwall" || levelMapObjects[i][j].tag == "outerwall" ){
                         wallAudioSource = levelMapObjects[i][j].GetComponent<AudioSource>();
                         done = true;
+                    }
+                    if(levelMapObjects[i][j].tag == "pellet" || levelMapObjects[i][j].tag == "powerpellet"){
+                        pelletLeft++;
                     }
                 }
             }
@@ -121,12 +130,13 @@ public class PacStudentController : MonoBehaviour
                 countdown.sprite = go;
             }
             else if(startTimer > 4){
+                startTimer = 0.0f;
                 countdown.enabled = false;
                 initialCountdownDone = true;
             }
         }
 
-        if(initialCountdownDone){
+        if(initialCountdownDone && !gameOver){
             playerTimer += Time.deltaTime;
             updateSurround();
             if(playerState == PacmanStates.ALIVE){
@@ -266,6 +276,12 @@ public class PacStudentController : MonoBehaviour
             }
             
             updateUI();
+            if(checkForGameOver()){
+                gameOver = true;
+            }
+        }
+        if(gameOver){
+            GameOverSequence();
         }
     }
 
@@ -279,6 +295,33 @@ public class PacStudentController : MonoBehaviour
             }
             
             movingAudio.Play();
+        }
+    }
+
+    private bool checkForGameOver(){
+        if(pelletLeft == 0){
+            return true;
+        }
+        if(playerLives < 0){
+            return true;
+        }
+        return false;
+    }
+
+    public void GameOverSequence(){
+        startTimer += Time.deltaTime;
+        countdown.sprite = gameOverSprite;
+        countdown.enabled = true;
+        if(playerScore > PlayerPrefs.GetInt("score1", 0)){
+            PlayerPrefs.SetInt("score1", playerScore);
+            PlayerPrefs.SetFloat("timer1", playerTimer);
+        }
+        else if(playerScore == PlayerPrefs.GetInt("score1", 0) && ( playerTimer < PlayerPrefs.GetFloat("timer1", 9999999.0f))){
+            PlayerPrefs.SetInt("score1", playerScore);
+            PlayerPrefs.SetFloat("timer1", playerTimer);
+        }
+        if(startTimer > 3){
+            SceneManager.LoadScene(0);
         }
     }
 
@@ -306,6 +349,8 @@ public class PacStudentController : MonoBehaviour
             playerScore += 10; 
             levelMapObjects[(int)gridPos.x][(int)gridPos.y] = Instantiate(emptySquare, other.gameObject.transform.position, Quaternion.identity);
             Destroy(other.gameObject);
+            pelletLeft--;
+            Debug.Log(pelletLeft);  
         }
         if(other.gameObject.tag == "cherry"){
             playerScore += 100;
@@ -326,14 +371,6 @@ public class PacStudentController : MonoBehaviour
                 playerLives -= 1;
                 playerAnimator.SetBool("isDead", true);
                 playerState = PacmanStates.DEAD;
-                //wait for 0.5 seconds
-                //play death animation
-                //when changing to the final few frames, play exploding sound.
-                //respawn the player at grid(1, 1)
-                //
-                if(playerLives < 0){
-                    Debug.Log("Game Over");
-                }
             }
         }
     }
@@ -363,4 +400,8 @@ public class PacStudentController : MonoBehaviour
         dead.clip = secondDeathSound;
         dead.Play();
     }
+    public void LoadStartMenu() {
+        SceneManager.LoadSceneAsync(0);
+    }
 }   
+
