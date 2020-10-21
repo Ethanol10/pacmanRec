@@ -6,7 +6,7 @@ public class GhostController : MonoBehaviour
 {
     private Tweener tweener;
     private Vector2 gridPos; 
-    private Vector2 spawnPoint;
+    public Vector3 spawnPoint;
     private List<List<GameObject>> levelMapObjects;
     private List<List<GameObject>> surroundLMObjects;
     private LevelGenerator LevelGeneratorObj;
@@ -20,6 +20,7 @@ public class GhostController : MonoBehaviour
     {
         tweener = GetComponent<Tweener>();
         LevelGeneratorObj = GameObject.FindWithTag("levelGen").GetComponent<LevelGenerator>();
+        spawnPoint = gameObject.transform.position;
         gridPos.y = gameObject.transform.position.x/1.25f;
         gridPos.x = Mathf.Abs(gameObject.transform.position.y/1.25f);
         lastMove = 0;
@@ -32,19 +33,25 @@ public class GhostController : MonoBehaviour
         //choose a direction
         //If this direction goes back to an old spot, then disregard
         //
-        switch(aiVariant){
-            case 0:
-                //variant 1
-                break;
-            case 1:
-                //variant 2
-                break;
-            case 2:
-                updateGhost3();
-                break;
-            case 3:
-                //variant 4
-                break;
+        if(ghost.state != Ghost.GhostState.DEAD){
+            switch(aiVariant){
+                case 0:
+                    //variant 1
+                    break;
+                case 1:
+                    //variant 2
+                    break;
+                case 2:
+                    updateGhost3();
+                    break;
+                case 3:
+                    //variant 4
+                    break;
+            }
+            
+        }
+        else if(ghost.state == Ghost.GhostState.DEAD){
+            deathUpdate();
         }
         updateEyePos();
     }
@@ -172,6 +179,14 @@ public class GhostController : MonoBehaviour
         }
     }
 
-    public void circuitBreakerGhost3(){
+    public void deathUpdate(){
+        if(!tweener.tweenActive()){
+            tweener.AddTween(gameObject.transform, gameObject.transform.position, spawnPoint, delayAnim * 10);
+            gridPos.x = Mathf.Abs(spawnPoint.y/1.25f);
+            gridPos.y = spawnPoint.x/1.25f;
+        }
+        if(gameObject.transform.position == spawnPoint){
+            ghost.setGhostState("alive");
+        }
     }
 }

@@ -63,6 +63,7 @@ public class GhostHandler : MonoBehaviour
             else{
                 newGhostShape.GetComponent<GhostController>().ghost = newGhost;
                 newGhostShape.GetComponent<GhostController>().aiVariant = i;
+                newGhostShape.GetComponent<GhostController>().spawnPoint = newGhostShape.transform.position;
             }
             ghosts.Add(newGhost);
         }

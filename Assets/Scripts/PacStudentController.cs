@@ -135,7 +135,7 @@ public class PacStudentController : MonoBehaviour
             }
         }
 
-        if(initialCountdownDone && !gameOver){
+        if(initialCountdownDone && !gameOver && playerState != PacmanStates.DEAD){
             playerTimer += Time.deltaTime;
             updateSurround();
             if(playerState == PacmanStates.ALIVE){
@@ -257,26 +257,26 @@ public class PacStudentController : MonoBehaviour
                     }
                 }
             }
-            else if(playerState == PacmanStates.DEAD){
-                //ghostAnimator[0].GetCurrentAnimatorStateInfo(0).IsName("ghostMoving")
-                deadTimer += Time.deltaTime;
-                if(deadTimer >= deathWait){
-                    if(playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("pacmanMoving")){
-                        playerState = PacmanStates.ALIVE;
-                        playerAnimator.SetBool("isDead", false);
-                        gameObject.transform.position = spawnPoint;
-                        gridPos = new Vector2(1,1);
-                        deadTimer = 0;
-                    }
-                    if(dustParticles.isPlaying){
-                        dustParticles.Stop();
-                    }
-                }
-            }
             
             updateUI();
             if(checkForGameOver()){
                 gameOver = true;
+            }
+        }
+        if(playerState == PacmanStates.DEAD){
+            deadTimer += Time.deltaTime;
+            playerAnimator.enabled = true;
+            if(deadTimer >= deathWait){
+                if(playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("pacmanMoving")){
+                    playerState = PacmanStates.ALIVE;
+                    playerAnimator.SetBool("isDead", false);
+                    gameObject.transform.position = spawnPoint;
+                    gridPos = new Vector2(1,1);
+                    deadTimer = 0;
+                }
+                if(dustParticles.isPlaying){
+                    dustParticles.Stop();
+                }
             }
         }
         if(gameOver){
@@ -349,7 +349,6 @@ public class PacStudentController : MonoBehaviour
             levelMapObjects[(int)gridPos.x][(int)gridPos.y] = Instantiate(emptySquare, other.gameObject.transform.position, Quaternion.identity);
             Destroy(other.gameObject);
             pelletLeft--;
-            Debug.Log(pelletLeft);  
         }
         if(other.gameObject.tag == "cherry"){
             playerScore += 100;

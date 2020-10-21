@@ -40,14 +40,14 @@ public class Ghost
     }
 
     public void ghostUpdate(){
-        if(state == GhostState.DEAD){       
-            deadTimer += Time.deltaTime;
-            if(deadTimer > deadTimerLimit){
-                deadTimer = 0.0f;
-                setGhostState("alive");
-            }
-        }
-        else if(state == GhostState.SCARED || state == GhostState.RECOVERING){
+        // if(state == GhostState.DEAD){       
+        //     deadTimer += Time.deltaTime;
+        //     if(deadTimer > deadTimerLimit){
+        //         deadTimer = 0.0f;
+        //         setGhostState("alive");
+        //     }
+        // }
+        if(state == GhostState.SCARED || state == GhostState.RECOVERING){
             scaredTimer += Time.deltaTime;
             if(scaredTimer > scaredTimerLimit){
                 scaredTimer = 0.0f;
@@ -57,6 +57,7 @@ public class Ghost
                 setGhostState("recovering");
             }
         }
+
         animationUpdate();
     }
 
@@ -75,7 +76,6 @@ public class Ghost
         }
         if(state == GhostState.ALIVE){
             eye.SetActive(true);
-            Debug.Log("Alive");
             ghostAnimator.SetBool("isScared", false);
             ghostAnimator.SetBool("isRecovering", false);
             ghostAnimator.SetBool("isDead", false);
