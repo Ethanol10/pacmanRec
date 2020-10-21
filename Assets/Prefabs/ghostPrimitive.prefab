@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 8119514163210037926}
   - component: {fileID: 8119514163210037927}
   - component: {fileID: 8007086592201192019}
+  - component: {fileID: -5324203693341759846}
+  - component: {fileID: 1214560227560315933}
   m_Layer: 0
   m_Name: ghostPrimitive
   m_TagString: ghost
@@ -117,6 +119,30 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.28, y: 1.28, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-5324203693341759846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8119514163210037920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58d8995f1e9add14a8ee926fe4c39159, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1214560227560315933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8119514163210037920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ecc99ab3a1df5841a1c434023fcadcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2582071861683913373
 PrefabInstance:
   m_ObjectHideFlags: 0

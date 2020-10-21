@@ -14,7 +14,6 @@ public class PacStudentController : MonoBehaviour
     private LevelGenerator LevelGeneratorObj;
     private Teleporter TeleporterObj;
     private Vector2 gridPos = new Vector2(1, 1);
-    private Vector2 oldGridPos = new Vector2(1, 1);
     public float delayAnim = 0.5f;
     private AudioSource movingAudio;
     public AudioClip eatingAudio;

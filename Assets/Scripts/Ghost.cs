@@ -32,9 +32,11 @@ public class Ghost
         ghostAnimator = GhostShape.GetComponent<Animator>();
         eye = MonoBehaviour.Instantiate(Eyes[0], GhostShape.transform.position + new Vector3(0, 0, -1), Quaternion.identity);
         timer = GhostShape.transform.GetChild(0).transform.GetChild(0).GetComponent<Text>();
-        GhostShape.transform.GetChild(0).gameObject.SetActive(false);
+        GhostShape.transform.GetChild(0).gameObject.SetActive(true);
         scaredTimerLimit = inpScaredTimerLimit;
-        timer.text = "" + number + 1;
+        int num = number +1;
+        timer.text = "" + num;
+        timer.enabled = true;
     }
 
     public void ghostUpdate(){
@@ -48,6 +50,7 @@ public class Ghost
         else if(state == GhostState.SCARED || state == GhostState.RECOVERING){
             scaredTimer += Time.deltaTime;
             if(scaredTimer > scaredTimerLimit){
+                scaredTimer = 0.0f;
                 setGhostState("alive");
             }
             else if(scaredTimer > scaredTimerLimit - 3 ){
@@ -72,6 +75,7 @@ public class Ghost
         }
         if(state == GhostState.ALIVE){
             eye.SetActive(true);
+            Debug.Log("Alive");
             ghostAnimator.SetBool("isScared", false);
             ghostAnimator.SetBool("isRecovering", false);
             ghostAnimator.SetBool("isDead", false);

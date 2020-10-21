@@ -57,6 +57,13 @@ public class GhostHandler : MonoBehaviour
             GameObject newGhostShape = Instantiate(ghostPrimitive, new Vector3(position[i].x, position[i].y, 0), Quaternion.identity);
             newGhostShape.GetComponent<SpriteRenderer>().color = ghostColor[i];
             Ghost newGhost = new Ghost(newGhostShape, eyes, (int)scaredTimerLimit, i);
+            if(gameObject.tag == "title"){
+                newGhostShape.GetComponent<GhostController>().enabled = false;
+            }
+            else{
+                newGhostShape.GetComponent<GhostController>().ghost = newGhost;
+                newGhostShape.GetComponent<GhostController>().aiVariant = i;
+            }
             ghosts.Add(newGhost);
         }
 
