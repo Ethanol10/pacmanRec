@@ -28,7 +28,7 @@ public class GhostController : MonoBehaviour
         gridPos.y = gameObject.transform.position.x/1.25f;
         gridPos.x = Mathf.Abs(gameObject.transform.position.y/1.25f);
         lastMove = 0;
-        delayAnim = 0.3f;
+        delayAnim = 0.35f;
         playerObj = GameObject.FindGameObjectWithTag("Player");
         playerController = playerObj.GetComponent<PacStudentController>();
     }
@@ -44,6 +44,9 @@ public class GhostController : MonoBehaviour
             if(checkExitGuardPos()){
                 updateGETOUT();
             }
+            else if(ghost.state == Ghost.GhostState.SCARED || ghost.state == Ghost.GhostState.RECOVERING){
+                updateGhost1();
+            }
             else{
                 switch(aiVariant){
                     case 0:
@@ -57,6 +60,9 @@ public class GhostController : MonoBehaviour
                         break;
                     case 3:
                         //variant 4
+                        //I give up. I ran out of time and I need to do other assignments.
+                        //throwing in updateghost3 instead.
+                        updateGhost3();
                         break;
                 }
             }            
@@ -515,6 +521,47 @@ public class GhostController : MonoBehaviour
                         ghost.setEyeState("right");
                     }
                     break;
+            }
+        }
+    }
+    
+    public void updateGhost4(){
+        int centerRow = (int)levelMapObjects.Count/2;
+        int centerCol = (int)levelMapObjects[0].Count/2;
+        bool canHorizontal = false;
+        bool canVertical = false;
+
+        List<string> validMoves = new List<string>();
+        if(gridPos.x >= centerRow){
+            //go left
+            if(surroundLMObjects[1][0].tag == "pellet" || surroundLMObjects[1][0].tag == "powerpellet" || surroundLMObjects[1][0].tag == "empty" || surroundLMObjects[1][0].tag == "teleport"){
+                if(!isOldDir(3)){
+                    validMoves.Add("left");
+                }
+            }
+        }
+        else if(gridPos.x < centerRow){
+            //go right
+            if(surroundLMObjects[1][2].tag == "pellet" || surroundLMObjects[1][2].tag == "powerpellet" || surroundLMObjects[1][2].tag == "empty" || surroundLMObjects[1][2].tag == "teleport"){
+                if(!isOldDir(1)){
+                    validMoves.Add("right");
+                }
+            }
+        }
+        if(gridPos.y >= centerCol){
+            //go down
+            if(surroundLMObjects[2][1].tag == "pellet" || surroundLMObjects[2][1].tag == "powerpellet" || surroundLMObjects[2][1].tag == "empty" || surroundLMObjects[2][1].tag == "teleport"){
+                if(!isOldDir(2)){
+                    validMoves.Add("down");
+                }
+            }
+        }
+        else if(gridPos.y < centerCol){
+            //go up
+            if(surroundLMObjects[0][1].tag == "pellet" || surroundLMObjects[0][1].tag == "powerpellet" || surroundLMObjects[0][1].tag == "empty" || surroundLMObjects[0][1].tag == "teleport"){
+                if(!isOldDir(0)){
+                    validMoves.Add("up");
+                }
             }
         }
     }

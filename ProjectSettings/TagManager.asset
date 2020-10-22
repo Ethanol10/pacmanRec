@@ -22,6 +22,7 @@ TagManager:
   - ghost
   - exit
   - exit2
+  - target4
   layers:
   - Default
   - TransparentFX

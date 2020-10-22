@@ -121,90 +121,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1001 &346443881
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 8007086592201192019, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_Size.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8007086592201192019, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_Size.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8007086592201192019, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_Size.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037920, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_Name
-      value: ghostPrimitive
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.12
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.48
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8119514163210037925, guid: 4c61ba865037452499e5d99ffd972162,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 4c61ba865037452499e5d99ffd972162, type: 3}
 --- !u!1 &379312982
 GameObject:
   m_ObjectHideFlags: 0
@@ -5327,7 +5243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e04b3924bbf0dfa43a61d0c69f52193e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  delayAnim: 0.2
+  delayAnim: 0.4
   eatingAudio: {fileID: 8300000, guid: 5883470abb879df4e9298c1efd0018bb, type: 3}
   movingNoEating: {fileID: 8300000, guid: fda9fe827452fb24bb17808b0a01bbf4, type: 3}
   deathSoundObj: {fileID: 7860453943059868905, guid: f97dca846afa30343a32f5b1dead12ce,
@@ -6046,7 +5962,7 @@ PrefabInstance:
     - target: {fileID: 7947915662012959239, guid: c4b7651dcba893043abefc75da3298c5,
         type: 3}
       propertyPath: scaredTimerLimit
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7947915662012959239, guid: c4b7651dcba893043abefc75da3298c5,
         type: 3}
