@@ -18,53 +18,86 @@ public class LevelGenerator : MonoBehaviour
     {1,2,2,2,2,1,5,4,3,4,4,3,0,4},
     {0,0,0,0,0,2,5,4,3,4,4,3,0,3},
     {0,0,0,0,0,2,5,4,4,0,0,0,0,0},
-    {0,0,0,0,0,2,5,4,4,0,3,4,4,0},
-    {2,2,2,2,2,1,5,3,3,0,4,0,0,0},
-    {0,0,0,0,0,0,5,0,0,0,4,0,0,0},
+    {0,0,0,0,0,2,5,4,4,0,3,4,4,10},
+    {2,2,2,2,2,1,5,3,3,0,4,9,9,9},
+    {8,0,0,0,0,0,5,0,0,0,4,0,0,0},
     }; 
     
+    int[,] UIborder = 
+    {
+        {1,2,2,2,2,2,2,2,2,2,2,1},
+        {2,0,0,0,0,0,0,0,0,0,0,2},
+        {2,0,0,0,0,0,0,0,0,0,0,2},
+        {2,0,0,0,0,0,0,0,0,0,0,2},
+        {2,0,0,0,0,0,0,0,0,0,0,2},
+        {2,0,0,0,0,0,0,0,0,0,0,2},
+        {2,0,0,0,0,0,0,0,0,0,0,2},
+        {2,0,0,0,0,0,0,0,0,0,0,2},
+        {2,0,0,0,0,0,0,0,0,0,0,2},
+        {1,2,2,2,2,2,2,2,2,2,2,1}
+    };
     private List< List<GameObject> > levelMapObjects = new List<List<GameObject>>();
-
+    public bool mapCompleted = false;
     [SerializeField]
     private GameObject[] wallObjectList;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        float xPos = 0;
-        float yPos = 0;
+        if(gameObject.tag == "UIborder"){
+            float xPos = -5.625f;
+            float yPos = 0.625f;
+            for(int col = 0; col < UIborder.GetLength(0); col++){
+                List<GameObject> sublist = new List<GameObject>();
+                for(int row = 0; row < UIborder.GetLength(1); row++){
+                    InstantiateWallObject(col, row, xPos, yPos, ref sublist);
+                    xPos += 1.25f;
+                }
+                levelMapObjects.Add(sublist);
+                xPos = -5.625f;
+                yPos -= 1.25f;
+            }
 
-        for(int col = 0; col < cornerlevelMap.GetLength(0); col++){
-            List<GameObject> sublist = new List<GameObject>();
-            for(int row = 0; row < cornerlevelMap.GetLength(1); row++){
-                InstantiateWallObject(col, row, xPos, yPos, ref sublist);
-                xPos += 1.25f;
-            }
-            for(int row = cornerlevelMap.GetLength(1) - 1; row > -1; row-- ){
-                InstantiateWallObject(col, row, xPos, yPos, ref sublist);
-                xPos += 1.25f;
-            }
-            levelMapObjects.Add(sublist);
-            xPos = 0;
-            yPos -= 1.25f;
+            orientWall();
+            gameObject.GetComponent<BlinkingBorder>().StartFlashing();
         }
-        for(int col = cornerlevelMap.GetLength(0) - 2; col > -1; col--){
-            List<GameObject> sublist = new List<GameObject>();
-            for(int row = 0; row < cornerlevelMap.GetLength(1); row++){
-                InstantiateWallObject(col, row, xPos, yPos, ref sublist);
-                xPos += 1.25f;
+        else{
+            float xPos = 0;
+            float yPos = 0;
+            for(int col = 0; col < cornerlevelMap.GetLength(0); col++){
+                List<GameObject> sublist = new List<GameObject>();
+                for(int row = 0; row < cornerlevelMap.GetLength(1); row++){
+                    InstantiateWallObject(col, row, xPos, yPos, ref sublist);
+                    xPos += 1.25f;
+                }
+                for(int row = cornerlevelMap.GetLength(1) - 1; row > -1; row-- ){
+                    InstantiateWallObject(col, row, xPos, yPos, ref sublist);
+                    xPos += 1.25f;
+                }
+                levelMapObjects.Add(sublist);
+                xPos = 0;
+                yPos -= 1.25f;
             }
-            for(int row = cornerlevelMap.GetLength(1) - 1; row > -1; row-- ){
-                InstantiateWallObject(col, row, xPos, yPos, ref sublist);
-                xPos += 1.25f;
+            for(int col = cornerlevelMap.GetLength(0) - 2; col > -1; col--){
+                List<GameObject> sublist = new List<GameObject>();
+                for(int row = 0; row < cornerlevelMap.GetLength(1); row++){
+                    InstantiateWallObject(col, row, xPos, yPos, ref sublist);
+                    xPos += 1.25f;
+                }
+                for(int row = cornerlevelMap.GetLength(1) - 1; row > -1; row-- ){
+                    InstantiateWallObject(col, row, xPos, yPos, ref sublist);
+                    xPos += 1.25f;
+                }
+                levelMapObjects.Add(sublist);
+                xPos = 0;
+                yPos -= 1.25f;
             }
-            levelMapObjects.Add(sublist);
-            xPos = 0;
-            yPos -= 1.25f;
-        }
-        yPos = 0;
+            yPos = 0;
 
-        orientWall();
+            orientWall();
+            mapCompleted = true;
+        }
+        
     }
 
     // Update is called once per frame
@@ -73,31 +106,73 @@ public class LevelGenerator : MonoBehaviour
         
     }
     void InstantiateWallObject(int col, int row, float xPos, float yPos, ref List<GameObject> sublist){
-        switch(cornerlevelMap[col,row]){
-            case 0:
-                sublist.Add(Instantiate(wallObjectList[0], new Vector3(xPos, yPos, 0), Quaternion.identity));
-                break;
-            case 1:
-                sublist.Add(Instantiate(wallObjectList[1], new Vector3(xPos, yPos, 0), Quaternion.identity));
-                break;
-            case 2:
-                sublist.Add(Instantiate(wallObjectList[2], new Vector3(xPos, yPos, 0), Quaternion.identity));
-                break;
-            case 3:
-                sublist.Add(Instantiate(wallObjectList[3], new Vector3(xPos, yPos, 0), Quaternion.identity));
-                break;
-            case 4:
-                sublist.Add(Instantiate(wallObjectList[4], new Vector3(xPos, yPos, 0), Quaternion.identity));
-                break;
-            case 5:
-                sublist.Add(Instantiate(wallObjectList[5], new Vector3(xPos, yPos, 0), Quaternion.identity));
-                break;
-            case 6:
-                sublist.Add(Instantiate(wallObjectList[6], new Vector3(xPos, yPos, 0), Quaternion.identity));
-                break;
-            case 7:
-                sublist.Add(Instantiate(wallObjectList[7], new Vector3(xPos, yPos, 0), Quaternion.identity));
-                break;    
+        if(gameObject.tag == "UIborder"){
+            switch(UIborder[col,row]){
+                case 0:
+                    sublist.Add(Instantiate(wallObjectList[0], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 1:
+                    sublist.Add(Instantiate(wallObjectList[1], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 2:
+                    sublist.Add(Instantiate(wallObjectList[2], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 3:
+                    sublist.Add(Instantiate(wallObjectList[3], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 4:
+                    sublist.Add(Instantiate(wallObjectList[4], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 5:
+                    sublist.Add(Instantiate(wallObjectList[5], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 6:
+                    sublist.Add(Instantiate(wallObjectList[6], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 7:
+                    sublist.Add(Instantiate(wallObjectList[7], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;  
+                case 8:
+                    sublist.Add(Instantiate(wallObjectList[8], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+            }
+        }
+        else{
+            switch(cornerlevelMap[col,row]){
+                case 0:
+                    sublist.Add(Instantiate(wallObjectList[0], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 1:
+                    sublist.Add(Instantiate(wallObjectList[1], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 2:
+                    sublist.Add(Instantiate(wallObjectList[2], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 3:
+                    sublist.Add(Instantiate(wallObjectList[3], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 4:
+                    sublist.Add(Instantiate(wallObjectList[4], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 5:
+                    sublist.Add(Instantiate(wallObjectList[5], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 6:
+                    sublist.Add(Instantiate(wallObjectList[6], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 7:
+                    sublist.Add(Instantiate(wallObjectList[7], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;    
+                case 8:
+                    sublist.Add(Instantiate(wallObjectList[8], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 9:
+                    sublist.Add(Instantiate(wallObjectList[9], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+                case 10: 
+                    sublist.Add(Instantiate(wallObjectList[10], new Vector3(xPos, yPos, 0), Quaternion.identity));
+                    break;
+            }
         }
     }
 
@@ -293,7 +368,7 @@ public class LevelGenerator : MonoBehaviour
         return 0;
     }
 
-    List< List<GameObject> > checkSurround(int row, int col){
+    public List< List<GameObject> > checkSurround(int row, int col){
         List< List<GameObject> > result = new List<List<GameObject>>();
         List<GameObject> aRow = new List<GameObject>();
         
@@ -357,5 +432,9 @@ public class LevelGenerator : MonoBehaviour
         result.Add(aRow);
         
         return result; 
+    }
+
+    public List<List<GameObject>> getLevelMapObjects(){
+        return levelMapObjects;
     }
 }

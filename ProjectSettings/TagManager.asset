@@ -12,6 +12,17 @@ TagManager:
   - pellet
   - powerpellet
   - tjunc
+  - title
+  - UIborder
+  - levelGen
+  - teleport
+  - cherry
+  - ghosthandler
+  - ghosttimer
+  - ghost
+  - exit
+  - exit2
+  - target4
   layers:
   - Default
   - TransparentFX
