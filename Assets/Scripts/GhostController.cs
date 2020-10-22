@@ -14,6 +14,10 @@ public class GhostController : MonoBehaviour
     private float delayAnim;
     public Ghost ghost;
     public int aiVariant;
+
+    private GameObject playerObj;
+    private PacStudentController playerController;
+    private int getOutLookFor;
     
     // Start is called before the first frame update
     void Start()
@@ -25,6 +29,8 @@ public class GhostController : MonoBehaviour
         gridPos.x = Mathf.Abs(gameObject.transform.position.y/1.25f);
         lastMove = 0;
         delayAnim = 0.3f;
+        playerObj = GameObject.FindGameObjectWithTag("Player");
+        playerController = playerObj.GetComponent<PacStudentController>();
     }
 
     // Update is called once per frame
@@ -32,23 +38,28 @@ public class GhostController : MonoBehaviour
     {
         //choose a direction
         //If this direction goes back to an old spot, then disregard
-        //
+        
         if(ghost.state != Ghost.GhostState.DEAD){
-            switch(aiVariant){
-                case 0:
-                    //variant 1
-                    break;
-                case 1:
-                    //variant 2
-                    break;
-                case 2:
-                    updateGhost3();
-                    break;
-                case 3:
-                    //variant 4
-                    break;
+            updateSurround();
+            if(checkExitGuardPos()){
+                updateGETOUT();
             }
-            
+            else{
+                switch(aiVariant){
+                    case 0:
+                        updateGhost1();
+                        break;
+                    case 1:
+                        updateGhost2();
+                        break;
+                    case 2:
+                        updateGhost3();
+                        break;
+                    case 3:
+                        //variant 4
+                        break;
+                }
+            }            
         }
         else if(ghost.state == Ghost.GhostState.DEAD){
             deathUpdate();
@@ -85,13 +96,342 @@ public class GhostController : MonoBehaviour
         // }
     }
 
-    private void updateGhost1(){
+    private bool checkExitGuardPos(){
+        return surroundLMObjects[1][1].tag == "exit";
+    }   
 
+    private void updateGETOUT(){
+        if(!tweener.tweenActive()){
+            if(surroundLMObjects[0][1].tag == "exit2"){
+                if(!isOldDir(0)){
+                    tweener.AddTween(gameObject.transform, 
+                            gameObject.transform.position, 
+                            new Vector3(gameObject.transform.position.x,gameObject.transform.position.y + 1.25f, 0), 
+                            delayAnim);
+                    gridPos += new Vector2(-1, 0);
+                    lastMove = 0;
+                    ghost.setEyeState("up");
+                }
+            }
+            else if(surroundLMObjects[2][1].tag == "exit2"){
+                if(!isOldDir(2)){
+                    tweener.AddTween(gameObject.transform, 
+                        gameObject.transform.position, 
+                        new Vector3(gameObject.transform.position.x,gameObject.transform.position.y - 1.25f, 0), 
+                        delayAnim);
+                    gridPos += new Vector2(1, 0);
+                    lastMove = 2;
+                    ghost.setEyeState("down");
+                }
+            }
+            else if(surroundLMObjects[1][0].tag == "exit"){
+                if(!isOldDir(3)){
+                    tweener.AddTween(gameObject.transform, 
+                        gameObject.transform.position, 
+                        new Vector3(gameObject.transform.position.x - 1.25f ,gameObject.transform.position.y, 0), 
+                        delayAnim);
+                    if(!(gridPos.y - 1 < 0)){
+                        gridPos += new Vector2(0, -1);
+                        lastMove = 3;     
+                    }
+                    ghost.setEyeState("left");
+                }
+                else{
+                    tweener.AddTween(gameObject.transform, 
+                        gameObject.transform.position, 
+                        new Vector3(gameObject.transform.position.x + 1.25f ,gameObject.transform.position.y, 0), 
+                        delayAnim);
+                    gridPos += new Vector2(0, 1);
+                    lastMove = 1;
+                    ghost.setEyeState("right");
+                }
+            }
+            else if(surroundLMObjects[1][2].tag == "exit"){
+                if(!isOldDir(1)){
+                    tweener.AddTween(gameObject.transform, 
+                        gameObject.transform.position, 
+                        new Vector3(gameObject.transform.position.x + 1.25f ,gameObject.transform.position.y, 0), 
+                        delayAnim);
+                    gridPos += new Vector2(0, 1);
+                    lastMove = 1;
+                    ghost.setEyeState("right");
+                }
+            }
+        }
     }
 
+    private void updateGhost1(){
+        bool teleportMovement = false;
+        if(!tweener.tweenActive()){
+            Vector2 playerPos = playerController.getGridPos();
+            //for some reason x is y and y is x. I screwed up and I will not do this again...
+            //wait, but x is y already in the grid pos so since they're already switched I will only need
+            //to compare them directly. Don't switch them idiot.
+            List<string> validMoves = new List<string>();
+            if(surroundLMObjects[0][1].tag == "pellet" || surroundLMObjects[0][1].tag == "powerpellet" || surroundLMObjects[0][1].tag == "empty" || surroundLMObjects[0][1].tag == "teleport"){
+                if(!isOldDir(0)){
+                    validMoves.Add("up");
+                }
+            }
+            if(surroundLMObjects[1][0].tag == "pellet" || surroundLMObjects[1][0].tag == "powerpellet" || surroundLMObjects[1][0].tag == "empty" || surroundLMObjects[1][0].tag == "teleport"){
+                if(!isOldDir(3)){
+                    validMoves.Add("left");
+                }
+            }
+            if(surroundLMObjects[2][1].tag == "pellet" || surroundLMObjects[2][1].tag == "powerpellet" || surroundLMObjects[2][1].tag == "empty" || surroundLMObjects[2][1].tag == "teleport"){
+                if(!isOldDir(2)){
+                    validMoves.Add("down");
+                }
+            }
+            if(surroundLMObjects[1][2].tag == "pellet" || surroundLMObjects[1][2].tag == "powerpellet" || surroundLMObjects[1][2].tag == "empty" || surroundLMObjects[1][2].tag == "teleport"){
+                if(!isOldDir(1)){
+                    validMoves.Add("right");
+                }
+            }
+            
+            Vector2 dif = getDif(playerPos, gridPos);
+            List<int> difValidMoves = new List<int>();
+            for(int i = 0; i < validMoves.Count; i++){
+                switch(validMoves[i]){
+                    case "up":
+                        //add the two components of dif and compare the value with the sum of gridPos dif IF up was chosen.
+                        //save in a List in the same order as validmoves.
+                        Vector2 ifUpDif = getDif(playerPos, gridPos + new Vector2(-1, 0));
+                        difValidMoves.Add((int)(ifUpDif.x + ifUpDif.y));
+                        break;
+                    case "left":
+                        if(surroundLMObjects[1][0].tag == "teleport"){
+                            teleportMovement = true;
+                            tweener.AddTween(gameObject.transform, 
+                                    gameObject.transform.position, 
+                                    new Vector3(gameObject.transform.position.x + 1.25f ,gameObject.transform.position.y, 0), 
+                                    delayAnim);
+                            gridPos += new Vector2(0, 1);
+                            lastMove = 1;
+                            ghost.setEyeState("right");
+                        }
+                        else{
+                            Vector2 ifLeftDif = getDif(playerPos, gridPos + new Vector2(0, -1));
+                            difValidMoves.Add((int)(ifLeftDif.x + ifLeftDif.y));
+                        }
+                        break;
+                    case "down":
+                        Vector2 ifDownDif = getDif(playerPos, gridPos + new Vector2(1, 0));
+                        difValidMoves.Add((int)(ifDownDif.x + ifDownDif.y));
+                        break;
+                    case "right":
+                        if(surroundLMObjects[1][2].tag == "teleport"){
+                            teleportMovement = true;
+                            tweener.AddTween(gameObject.transform, 
+                                gameObject.transform.position, 
+                                new Vector3(gameObject.transform.position.x - 1.25f ,gameObject.transform.position.y, 0), 
+                                delayAnim);
+                            if(!(gridPos.y - 1 < 0)){
+                                gridPos += new Vector2(0, -1);
+                                lastMove = 3;     
+                            }
+                            ghost.setEyeState("left");
+                        }
+                        else{
+                            Vector2 ifRightDif = getDif(playerPos, gridPos + new Vector2(0, 1));
+                            difValidMoves.Add((int)(ifRightDif.x + ifRightDif.y));
+                        }
+                        break;
+                }
+            }
+
+            if(!teleportMovement){
+                int minDif = 0;
+                int minDifIndex = 0;
+                for(int i = 0; i < difValidMoves.Count; i++){
+                    if(difValidMoves[i] > minDif){
+                        minDif = difValidMoves[i];
+                        minDifIndex = i;
+                    }
+                }
+                switch(validMoves[minDifIndex]){
+                    //Move the object.
+                    case "up":
+                        tweener.AddTween(gameObject.transform, 
+                                gameObject.transform.position, 
+                                new Vector3(gameObject.transform.position.x,gameObject.transform.position.y + 1.25f, 0), 
+                                delayAnim);
+                        gridPos += new Vector2(-1, 0);
+                        lastMove = 0;
+                        ghost.setEyeState("up");
+                        break;
+                    case "left":
+                        tweener.AddTween(gameObject.transform, 
+                            gameObject.transform.position, 
+                            new Vector3(gameObject.transform.position.x - 1.25f ,gameObject.transform.position.y, 0), 
+                            delayAnim);
+                        if(!(gridPos.y - 1 < 0)){
+                            gridPos += new Vector2(0, -1);
+                            lastMove = 3;     
+                        }
+                        ghost.setEyeState("left");
+                        break;
+                    case "down":
+                        tweener.AddTween(gameObject.transform, 
+                            gameObject.transform.position, 
+                            new Vector3(gameObject.transform.position.x,gameObject.transform.position.y - 1.25f, 0), 
+                            delayAnim);
+                        gridPos += new Vector2(1, 0);
+                        lastMove = 2;
+                        ghost.setEyeState("down");
+                        break;
+                    case "right":
+                        tweener.AddTween(gameObject.transform, 
+                                    gameObject.transform.position, 
+                                    new Vector3(gameObject.transform.position.x + 1.25f ,gameObject.transform.position.y, 0), 
+                                    delayAnim);
+                        gridPos += new Vector2(0, 1);
+                        lastMove = 1;
+                        ghost.setEyeState("right");
+                        break;
+                }
+            }
+        }
+    }
+    private void updateGhost2(){
+        bool teleportMovement = false;
+        if(!tweener.tweenActive()){
+            Vector2 playerPos = playerController.getGridPos();
+            //for some reason x is y and y is x. I screwed up and I will not do this again...
+            //wait, but x is y already in the grid pos so since they're already switched I will only need
+            //to compare them directly. Don't switch them idiot.
+            List<string> validMoves = new List<string>();
+            if(surroundLMObjects[0][1].tag == "pellet" || surroundLMObjects[0][1].tag == "powerpellet" || surroundLMObjects[0][1].tag == "empty" || surroundLMObjects[0][1].tag == "teleport"){
+                if(!isOldDir(0)){
+                    validMoves.Add("up");
+                }
+            }
+            if(surroundLMObjects[1][0].tag == "pellet" || surroundLMObjects[1][0].tag == "powerpellet" || surroundLMObjects[1][0].tag == "empty" || surroundLMObjects[1][0].tag == "teleport"){
+                if(!isOldDir(3)){
+                    validMoves.Add("left");
+                }
+            }
+            if(surroundLMObjects[2][1].tag == "pellet" || surroundLMObjects[2][1].tag == "powerpellet" || surroundLMObjects[2][1].tag == "empty" || surroundLMObjects[2][1].tag == "teleport"){
+                if(!isOldDir(2)){
+                    validMoves.Add("down");
+                }
+            }
+            if(surroundLMObjects[1][2].tag == "pellet" || surroundLMObjects[1][2].tag == "powerpellet" || surroundLMObjects[1][2].tag == "empty" || surroundLMObjects[1][2].tag == "teleport"){
+                if(!isOldDir(1)){
+                    validMoves.Add("right");
+                }
+            }
+            
+            Vector2 dif = getDif(playerPos, gridPos);
+            List<int> difValidMoves = new List<int>();
+            for(int i = 0; i < validMoves.Count; i++){
+                switch(validMoves[i]){
+                    case "up":
+                        //add the two components of dif and compare the value with the sum of gridPos dif IF up was chosen.
+                        //save in a List in the same order as validmoves.
+                        Vector2 ifUpDif = getDif(playerPos, gridPos + new Vector2(-1, 0));
+                        difValidMoves.Add((int)(ifUpDif.x + ifUpDif.y));
+                        break;
+                    case "left":
+                        if(surroundLMObjects[1][0].tag == "teleport"){
+                            teleportMovement = true;
+                            tweener.AddTween(gameObject.transform, 
+                                    gameObject.transform.position, 
+                                    new Vector3(gameObject.transform.position.x + 1.25f ,gameObject.transform.position.y, 0), 
+                                    delayAnim);
+                            gridPos += new Vector2(0, 1);
+                            lastMove = 1;
+                            ghost.setEyeState("right");
+                        }
+                        else{
+                            Vector2 ifLeftDif = getDif(playerPos, gridPos + new Vector2(0, -1));
+                            difValidMoves.Add((int)(ifLeftDif.x + ifLeftDif.y));
+                        }
+                        break;
+                    case "down":
+                        Vector2 ifDownDif = getDif(playerPos, gridPos + new Vector2(1, 0));
+                        difValidMoves.Add((int)(ifDownDif.x + ifDownDif.y));
+                        break;
+                    case "right":
+                        if(surroundLMObjects[1][2].tag == "teleport"){
+                            teleportMovement = true;
+                            tweener.AddTween(gameObject.transform, 
+                                gameObject.transform.position, 
+                                new Vector3(gameObject.transform.position.x - 1.25f ,gameObject.transform.position.y, 0), 
+                                delayAnim);
+                            if(!(gridPos.y - 1 < 0)){
+                                gridPos += new Vector2(0, -1);
+                                lastMove = 3;     
+                            }
+                            ghost.setEyeState("left");
+                        }
+                        else{
+                            Vector2 ifRightDif = getDif(playerPos, gridPos + new Vector2(0, 1));
+                            difValidMoves.Add((int)(ifRightDif.x + ifRightDif.y));
+                        }
+                        break;
+                }
+            }
+
+            if(!teleportMovement){
+                int minDif = 1000;
+                int minDifIndex = 0;
+                for(int i = 0; i < difValidMoves.Count; i++){
+                    if(difValidMoves[i] < minDif){
+                        minDif = difValidMoves[i];
+                        minDifIndex = i;
+                    }
+                }
+                switch(validMoves[minDifIndex]){
+                    //Move the object.
+                    case "up":
+                        tweener.AddTween(gameObject.transform, 
+                                gameObject.transform.position, 
+                                new Vector3(gameObject.transform.position.x,gameObject.transform.position.y + 1.25f, 0), 
+                                delayAnim);
+                        gridPos += new Vector2(-1, 0);
+                        lastMove = 0;
+                        ghost.setEyeState("up");
+                        break;
+                    case "left":
+                        tweener.AddTween(gameObject.transform, 
+                            gameObject.transform.position, 
+                            new Vector3(gameObject.transform.position.x - 1.25f ,gameObject.transform.position.y, 0), 
+                            delayAnim);
+                        if(!(gridPos.y - 1 < 0)){
+                            gridPos += new Vector2(0, -1);
+                            lastMove = 3;     
+                        }
+                        ghost.setEyeState("left");
+                        break;
+                    case "down":
+                        tweener.AddTween(gameObject.transform, 
+                            gameObject.transform.position, 
+                            new Vector3(gameObject.transform.position.x,gameObject.transform.position.y - 1.25f, 0), 
+                            delayAnim);
+                        gridPos += new Vector2(1, 0);
+                        lastMove = 2;
+                        ghost.setEyeState("down");
+                        break;
+                    case "right":
+                        tweener.AddTween(gameObject.transform, 
+                                    gameObject.transform.position, 
+                                    new Vector3(gameObject.transform.position.x + 1.25f ,gameObject.transform.position.y, 0), 
+                                    delayAnim);
+                        gridPos += new Vector2(0, 1);
+                        lastMove = 1;
+                        ghost.setEyeState("right");
+                        break;
+                }
+            }
+        }
+    }
+    
+    private Vector2 getDif(Vector2 pos1, Vector2 pos2){
+        return new Vector2(Mathf.Abs(pos1.x-pos2.x), Mathf.Abs(pos1.y - pos2.y));
+    }
     private void updateGhost3(){
         if(!tweener.tweenActive()){    
-            updateSurround();
             int chosenDir = Random.Range(0,4);
             switch(chosenDir){
                 case 0:

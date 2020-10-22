@@ -401,5 +401,9 @@ public class PacStudentController : MonoBehaviour
     public void LoadStartMenu() {
         SceneManager.LoadSceneAsync(0);
     }
+
+    public Vector2 getGridPos(){
+        return gridPos;
+    }
 }   
 
